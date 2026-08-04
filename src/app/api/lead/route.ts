@@ -1,0 +1,259 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { leadSchema, type RedirectDestination } from "@/lib/validations/lead";
+
+// ---------------------------------------------------------------------------
+// Redirect URL resolver
+// Maps a destination key to the actual URL from environment variables.
+// All placeholder values must be configured before deployment (§4.2.4).
+// Returns null (with a console warning) when env vars are not yet set so the
+// dev fallback path can still return a meaningful response.
+// ---------------------------------------------------------------------------
+
+function buildRedirectUrl(destination: RedirectDestination): string | null {
+  const WA_NUMBER    = process.env.WA_NUMBER    ?? "";
+  const TG_VIP_LINK  = process.env.TG_VIP_LINK  ?? "";
+  const FREE_TG_INVITE = process.env.FREE_TG_INVITE ?? "";
+
+  switch (destination) {
+    case "free_telegram":
+      if (!FREE_TG_INVITE) {
+        console.warn("[/api/lead] FREE_TG_INVITE is not configured");
+        return null;
+      }
+      return FREE_TG_INVITE;
+
+    case "vip_telegram":
+    case "copy_trading_telegram":
+      if (!TG_VIP_LINK) {
+        console.warn("[/api/lead] TG_VIP_LINK is not configured");
+        return null;
+      }
+      return TG_VIP_LINK;
+
+    case "mentorship_whatsapp":
+      if (!WA_NUMBER) {
+        console.warn("[/api/lead] WA_NUMBER is not configured");
+        return null;
+      }
+      return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
+        "Hello, I would like information about the 1-on-1 Coaching"
+      )}`;
+
+    case "video_course_whatsapp":
+      if (!WA_NUMBER) {
+        console.warn("[/api/lead] WA_NUMBER is not configured");
+        return null;
+      }
+      return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
+        "Hello, I would like information about the Video Course"
+      )}`;
+
+    default: {
+      const _exhaustive: never = destination;
+      console.error(`[/api/lead] Unhandled destination: ${_exhaustive}`);
+      return null;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Captcha verification (Cloudflare Turnstile – §4.2.1)
+// Returns true when verification passes or when running outside production.
+// ---------------------------------------------------------------------------
+
+async function verifyCaptcha(token: string): Promise<boolean> {
+  if (process.env.NODE_ENV !== "production") return true;
+
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.error("[/api/lead] TURNSTILE_SECRET_KEY is not set in production");
+    return false;
+  }
+
+  const res = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret, response: token }),
+    }
+  );
+
+  if (!res.ok) return false;
+
+  const data = (await res.json()) as { success: boolean };
+  return data.success === true;
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/lead
+// ---------------------------------------------------------------------------
+
+export async function POST(req: NextRequest) {
+  // 1. Parse JSON body
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  try {
+    return await handlePost(req, body);
+  } catch (error) {
+    console.error("--- LEAD API ERROR ---", error);
+    return NextResponse.json(
+      { error: "An unexpected server error occurred." },
+      { status: 500 }
+    );
+  }
+}
+
+async function handlePost(req: NextRequest, body: unknown): Promise<Response> {
+
+  // 2. Validate with Zod
+  const parsed = leadSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: "Validation failed",
+        fields: parsed.error.flatten().fieldErrors,
+      },
+      { status: 422 }
+    );
+  }
+
+  const { name, email, phone, consent, destination, captchaToken } =
+    parsed.data;
+
+  // 3. Verify captcha (production only — skipped in dev)
+  if (process.env.NODE_ENV === "production" && !captchaToken) {
+    return NextResponse.json(
+      { error: "Captcha verification is required." },
+      { status: 422 }
+    );
+  }
+  if (captchaToken) {
+    const captchaOk = await verifyCaptcha(captchaToken);
+    if (!captchaOk) {
+      return NextResponse.json(
+        { error: "Captcha verification failed. Please try again." },
+        { status: 422 }
+      );
+    }
+  }
+
+  // 4. Resolve redirect URL — null means the env var is not configured yet.
+  //    In production this is a hard error; in dev we still return success so
+  //    the lead capture flow can be tested without all env vars set.
+  const redirectUrl = buildRedirectUrl(destination);
+
+  if (!redirectUrl) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Service is temporarily unavailable. Please try again later." },
+        { status: 503 }
+      );
+    }
+    // Dev fallback: warn and continue — the client will handle a null redirectUrl
+    console.warn(
+      `[/api/lead] No redirect URL for destination "${destination}" — ` +
+        "configure the matching env var in .env.local."
+    );
+  }
+
+  // 5. Extract real IP for abuse detection
+  const ip =
+    req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    null;
+
+  // 6. Persist to Supabase — gracefully skip when credentials are missing
+  const supabase = createServiceClient();
+
+  if (!supabase) {
+    // Dev fallback: log the lead to the console so you can verify the payload
+    console.info("[/api/lead] DEV FALLBACK — lead not persisted to Supabase:", {
+      name,
+      email,
+      phone,
+      consent,
+      destination,
+      ip,
+    });
+
+    return NextResponse.json(
+      { success: true, redirectUrl: redirectUrl ?? null },
+      { status: 200 }
+    );
+  }
+
+  // 7. Upsert lead — idempotent on email
+  const { data: lead, error: leadError } = await supabase
+    .from("leads")
+    .upsert(
+      {
+        name,
+        email,
+        phone,
+        consent,
+        captcha_token: captchaToken ?? null,
+        source: destination,
+        ip_address: ip,
+      },
+      {
+        onConflict: "email",
+        ignoreDuplicates: false,
+      }
+    )
+    .select("id")
+    .single();
+
+  if (leadError) {
+    // Print the exact Supabase error object to the terminal for diagnosis
+    console.error("Supabase DB Insert Error:", leadError);
+    // Dev-friendly fallback: return success with a warning so the form still
+    // redirects the user even when the DB write fails (e.g. table not created yet)
+    return NextResponse.json(
+      {
+        success: true,
+        warning: leadError.message,
+        redirectUrl: redirectUrl ?? null,
+      },
+      { status: 200 }
+    );
+  }
+
+  // 8. Log the redirect — fire-and-forget, non-fatal
+  if (redirectUrl) {
+    supabase
+      .from("redirect_logs")
+      .insert({
+        lead_id:      lead.id,
+        destination,
+        resolved_url: redirectUrl,
+        user_agent:   req.headers.get("user-agent"),
+        ip_address:   ip,
+      })
+      .then(({ error }) => {
+        if (error) {
+          console.error("[/api/lead] redirect_logs insert error:", {
+            message: error.message,
+            code:    error.code,
+          });
+        }
+      });
+  }
+
+  // 9. Return success with the redirect URL
+  return NextResponse.json(
+    { success: true, redirectUrl: redirectUrl ?? null },
+    { status: 200 }
+  );
+} // end handlePost
+
+// Only POST is handled on this route
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+}
