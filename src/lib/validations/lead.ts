@@ -16,19 +16,19 @@ export type RedirectDestination = (typeof REDIRECT_DESTINATIONS)[number];
 
 export const leadSchema = z.object({
   name: z
-    .string({ required_error: "Name is required" })
+    .string({ error: "Name is required" })
     .trim()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must be at most 100 characters"),
 
   email: z
-    .string({ required_error: "Email is required" })
+    .string({ error: "Email is required" })
     .trim()
     .toLowerCase()
     .email("Please enter a valid email address"),
 
   phone: z
-    .string({ required_error: "Phone is required" })
+    .string({ error: "Phone is required" })
     .trim()
     .regex(
       /^\+?[0-9\s\-]{7,20}$/,

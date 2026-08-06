@@ -57,7 +57,7 @@ interface InputFieldProps {
   onChange:     (v: string) => void;
   errors?:      string[];
   autoComplete?:string;
-  inputRef?:    React.RefObject<HTMLInputElement>;
+  inputRef?:    React.RefObject<HTMLInputElement | null>;
 }
 
 function InputField({
@@ -122,7 +122,7 @@ export default function LeadModal({
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError,    setApiError]    = useState<string | null>(null);
   const [loading,     setLoading]     = useState(false);
-  const firstInputRef = useRef<HTMLInputElement>(null);
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
 
   /* Auto-focus first input */
   useEffect(() => {
