@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Allow cross-origin requests from local network IPs during development.
-  // Prevents the "cross-origin request blocked" warning when accessing the
-  // dev server from other devices on the same network (e.g. mobile testing).
-  allowedDevOrigins: [
-    "192.168.1.18",
-  ],
+  allowedDevOrigins: ["192.168.1.18"],
+
+  images: {
+    // Testimonial WebP images are served from /public — no remote domains needed.
+    // Explicitly list the formats so Next.js optimises them at build time.
+    formats: ["image/avif", "image/webp"],
+  },
 };
 
 export default nextConfig;

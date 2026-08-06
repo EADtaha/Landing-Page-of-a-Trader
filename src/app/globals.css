@@ -1,183 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/forms";
 
-/* ---------------------------------------------------------------------------
-   YassineFX Elite – Design Tokens (Tailwind v4 CSS-first @theme)
-   White Luxury / Dark Fintech aesthetic – §2.1 ui-rules.md
---------------------------------------------------------------------------- */
-
 @theme {
-  /* --- Fonts --- */
-  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-
-  /* --- Brand colour palette --- */
-
-  /* Gold accent – primary CTA, highlights, glows */
-  --color-gold-300: #fde68a;
-  --color-gold-400: #fbbf24;
-  --color-gold-500: #f59e0b;
-  --color-gold-600: #d97706;
-
-  /* Emerald accent – secondary / success states */
-  --color-emerald-400: #34d399;
-  --color-emerald-500: #10b981;
-
-  /* Dark backgrounds */
-  --color-dark-950: #030712;
-  --color-dark-900: #0a0f1e;
-  --color-dark-800: #0f172a;
-  --color-dark-700: #1e293b;
-  --color-dark-600: #334155;
-
-  /* Glass surface shades */
-  --color-glass-white: rgb(255 255 255 / 0.05);
-  --color-glass-border: rgb(255 255 255 / 0.08);
-  --color-glass-border-gold: rgb(251 191 36 / 0.25);
-
-  /* --- Shadows / glows --- */
-  --shadow-gold-glow: 0 0 40px rgb(251 191 36 / 0.15),
-    0 0 80px rgb(251 191 36 / 0.08);
-  --shadow-glass: 0 8px 32px rgb(0 0 0 / 0.4),
-    inset 0 1px 0 rgb(255 255 255 / 0.06);
-
-  /* --- Border radius --- */
-  --radius-glass: 1.25rem; /* 20px – consistent glassmorphism card radius */
-
-  /* --- Transitions --- */
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --color-gold:       #C9A84C;
+  --color-gold-light: #E8C97A;
+  --color-gold-pale:  #F5E6B8;
+  --color-obsidian:   #080808;
+  --color-charcoal:   #141414;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'DM Mono', monospace;
 }
-
-/* ---------------------------------------------------------------------------
-   Base resets & global defaults
---------------------------------------------------------------------------- */
 
 @layer base {
-  /* Force dark mode on <html> from initial load – §2.1 */
-  html {
-    color-scheme: dark;
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
+  html { scroll-behavior: smooth; scrollbar-width: none; color-scheme: dark; }
+  html::-webkit-scrollbar { display: none; }
   body {
-    background-color: var(--color-dark-900);
-    color: #f1f5f9; /* slate-100 */
-    font-family: var(--font-sans);
-  }
-
-  /* Remove default ring on focus-visible inputs — we apply custom gold ring */
-  *:focus {
-    outline: none;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #080808;
+    color: #ffffff;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-/* ---------------------------------------------------------------------------
-   Utility classes – glassmorphism primitives (reused across components)
---------------------------------------------------------------------------- */
+@keyframes goldShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0    rgba(201,168,76,0.4); }
+  50%       { box-shadow: 0 0 0 12px rgba(201,168,76,0);   }
+}
 
 @layer utilities {
-  /* Glass card container */
-  .glass-card {
-    background: var(--color-glass-white);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--color-glass-border);
-    border-radius: var(--radius-glass);
-    box-shadow: var(--shadow-glass);
+  .font-display   { font-family: 'Playfair Display', Georgia, serif; }
+  .font-mono-data { font-family: 'DM Mono', monospace; }
+  .gold-shimmer-text {
+    background: linear-gradient(90deg,#C9A84C 0%,#E8C97A 25%,#F5E6B8 50%,#E8C97A 75%,#C9A84C 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: goldShimmer 4s linear infinite;
   }
-
-  /* Gold-tinted glass variant (modal, hero card) */
-  .glass-card-gold {
-    background: linear-gradient(
-      135deg,
-      rgb(251 191 36 / 0.04) 0%,
-      rgb(255 255 255 / 0.03) 100%
-    );
+  .ticker-wrap  { overflow: hidden; white-space: nowrap; }
+  .ticker-inner { display: inline-flex; animation: ticker 20s linear infinite; }
+  .glass-card {
+    background: rgba(255,255,255,0.04);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--color-glass-border-gold);
-    border-radius: var(--radius-glass);
-    box-shadow: var(--shadow-glass), var(--shadow-gold-glow);
+    border: 1px solid rgba(201,168,76,0.15);
   }
-
-  /* Gold glow text */
-  .text-gold-glow {
-    color: var(--color-gold-400);
-    text-shadow: 0 0 20px rgb(251 191 36 / 0.5);
+  .glass-card-highlight {
+    background: rgba(201,168,76,0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(201,168,76,0.5);
   }
-
-  /* Gradient headline – white → gold shimmer */
-  .text-gradient-gold {
-    background: linear-gradient(
-      135deg,
-      #ffffff 0%,
-      #fde68a 40%,
-      #fbbf24 70%,
-      #ffffff 100%
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .telegram-btn { animation: pulse-gold 2.5s infinite; }
+  .section-reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
   }
-
-  /* Focus ring for form inputs */
-  .input-gold-focus {
-    transition: border-color 0.2s var(--ease-smooth),
-      box-shadow 0.2s var(--ease-smooth);
-  }
-
-  .input-gold-focus:focus {
-    border-color: var(--color-gold-500);
-    box-shadow: 0 0 0 3px rgb(245 158 11 / 0.2);
-  }
-
-  /* Animated gold gradient button */
-  .btn-gold {
-    background: linear-gradient(135deg, var(--color-gold-500), var(--color-gold-600));
-    color: var(--color-dark-950);
-    font-weight: 700;
-    letter-spacing: 0.025em;
-    transition: filter 0.2s var(--ease-smooth),
-      transform 0.15s var(--ease-smooth),
-      box-shadow 0.2s var(--ease-smooth);
-  }
-
-  .btn-gold:hover:not(:disabled) {
-    filter: brightness(1.12);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgb(245 158 11 / 0.35);
-  }
-
-  .btn-gold:active:not(:disabled) {
-    transform: translateY(0);
-    filter: brightness(0.97);
-  }
-
-  .btn-gold:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  /* Ghost outline button */
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--color-glass-border-gold);
-    color: var(--color-gold-300);
-    font-weight: 600;
-    letter-spacing: 0.025em;
-    transition: background-color 0.2s var(--ease-smooth),
-      border-color 0.2s var(--ease-smooth),
-      transform 0.15s var(--ease-smooth);
-  }
-
-  .btn-ghost:hover:not(:disabled) {
-    background: rgb(251 191 36 / 0.08);
-    border-color: var(--color-gold-400);
-    transform: translateY(-1px);
-  }
-
-  .btn-ghost:active:not(:disabled) {
-    transform: translateY(0);
-  }
+  .section-reveal.visible { opacity: 1; transform: translateY(0); }
+  .stagger-1 { transition-delay: 0.1s; }
+  .stagger-2 { transition-delay: 0.2s; }
+  .stagger-3 { transition-delay: 0.3s; }
+  .stagger-4 { transition-delay: 0.4s; }
 }
