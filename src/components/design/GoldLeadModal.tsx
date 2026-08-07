@@ -83,7 +83,7 @@ type ApiSuccessResponse = { success: true; redirectUrl: string | null };
 type ApiErrorResponse   = { error: string; fields?: FieldErrors };
 type ApiResponse        = ApiSuccessResponse | ApiErrorResponse;
 
-const clientSchema = leadSchema.omit({ captchaToken: true });
+const clientSchema = leadSchema;
 const INITIAL: FormFields = { name: '', email: '', phone: '', consent: false };
 
 // ---------------------------------------------------------------------------
