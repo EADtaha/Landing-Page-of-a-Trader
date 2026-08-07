@@ -11,9 +11,14 @@ import { leadSchema, type RedirectDestination } from "@/lib/validations/lead";
 // ---------------------------------------------------------------------------
 
 function buildRedirectUrl(destination: RedirectDestination): string | null {
-  const WA_NUMBER    = process.env.WA_NUMBER    ?? "";
-  const TG_VIP_LINK  = process.env.TG_VIP_LINK  ?? "";
-  const FREE_TG_INVITE = process.env.FREE_TG_INVITE ?? "";
+  // WA_NUMBER is the server-side var; fall back to NEXT_PUBLIC_WA_NUMBER
+  // so the route works even if only the public alias was set in the deployment env.
+  const WA_NUMBER =
+    process.env.WA_NUMBER ||
+    process.env.NEXT_PUBLIC_WA_NUMBER ||
+    "";
+  const TG_VIP_LINK    = process.env.TG_VIP_LINK    || process.env.NEXT_PUBLIC_TG_VIP_LINK    || "";
+  const FREE_TG_INVITE = process.env.FREE_TG_INVITE  || process.env.NEXT_PUBLIC_TG_FREE_INVITE || "";
 
   switch (destination) {
     case "free_telegram":
@@ -104,17 +109,14 @@ async function handlePost(req: NextRequest, body: unknown): Promise<Response> {
   const redirectUrl = buildRedirectUrl(destination);
 
   if (!redirectUrl) {
-    if (process.env.NODE_ENV === "production") {
-      return NextResponse.json(
-        { error: "Service is temporarily unavailable. Please try again later." },
-        { status: 503 }
-      );
-    }
-    // Dev fallback: warn and continue — the client will handle a null redirectUrl
+    // Log the missing config regardless of environment
     console.warn(
-      `[/api/lead] No redirect URL for destination "${destination}" — ` +
-        "configure the matching env var in .env.local."
+      `[/api/lead] No redirect URL resolved for destination "${destination}" — ` +
+        "ensure WA_NUMBER / TG_VIP_LINK / FREE_TG_INVITE are set in environment variables."
     );
+    // Return success with null redirectUrl — the client (GoldLeadModal) will
+    // fall back to its own resolveRedirectUrl() so the user still gets redirected.
+    // We never hard-block the user just because a server env var is missing.
   }
 
   // 5. Extract real IP for abuse detection
