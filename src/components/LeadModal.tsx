@@ -42,7 +42,7 @@ const DESTINATION_LABELS: Record<RedirectDestination, string> = {
 
 const INITIAL_FORM: FormFields = { name: "", email: "", phone: "", consent: false };
 
-const clientSchema = leadSchema.omit({ captchaToken: true });
+const clientSchema = leadSchema;
 
 // ---------------------------------------------------------------------------
 // InputField

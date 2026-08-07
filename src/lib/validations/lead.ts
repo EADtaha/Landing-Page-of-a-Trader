@@ -35,29 +35,13 @@ export const leadSchema = z.object({
       "Please enter a valid phone number (7–20 digits, optional + prefix)"
     ),
 
-  // BUG FIX #1: Zod v4 removed the second-argument errorMap on z.literal.
-  // Use z.boolean() + refine to produce the custom error message instead.
   consent: z
     .boolean()
     .refine((val) => val === true, {
       message: "You must accept the Privacy Policy to continue",
     }),
 
-  /**
-   * Which CTA triggered this submission.
-   * Determines the redirect URL returned to the client.
-   * Defaults to 'free_telegram' (hero hook form – §4.2.1).
-   */
   destination: z.enum(REDIRECT_DESTINATIONS).default("free_telegram"),
-
-  /**
-   * Captcha token from Cloudflare Turnstile or reCAPTCHA v3 (§4.2.1).
-   * BUG FIX #2 & #3: Removed process.env check from inside the schema —
-   * process.env is not reliably available in client bundles, and the
-   * production enforcement belongs in route.ts (server-side only).
-   * The field is simply optional here; route.ts enforces it in production.
-   */
-  captchaToken: z.string().optional(),
 });
 
 export type LeadPayload = z.infer<typeof leadSchema>;

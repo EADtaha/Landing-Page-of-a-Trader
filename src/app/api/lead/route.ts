@@ -58,35 +58,6 @@ function buildRedirectUrl(destination: RedirectDestination): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// Captcha verification (Cloudflare Turnstile – §4.2.1)
-// Returns true when verification passes or when running outside production.
-// ---------------------------------------------------------------------------
-
-async function verifyCaptcha(token: string): Promise<boolean> {
-  if (process.env.NODE_ENV !== "production") return true;
-
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) {
-    console.error("[/api/lead] TURNSTILE_SECRET_KEY is not set in production");
-    return false;
-  }
-
-  const res = await fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ secret, response: token }),
-    }
-  );
-
-  if (!res.ok) return false;
-
-  const data = (await res.json()) as { success: boolean };
-  return data.success === true;
-}
-
-// ---------------------------------------------------------------------------
 // POST /api/lead
 // ---------------------------------------------------------------------------
 
@@ -124,27 +95,10 @@ async function handlePost(req: NextRequest, body: unknown): Promise<Response> {
     );
   }
 
-  const { name, email, phone, consent, destination, captchaToken } =
+  const { name, email, phone, consent, destination } =
     parsed.data;
 
-  // 3. Verify captcha (production only — skipped in dev)
-  if (process.env.NODE_ENV === "production" && !captchaToken) {
-    return NextResponse.json(
-      { error: "Captcha verification is required." },
-      { status: 422 }
-    );
-  }
-  if (captchaToken) {
-    const captchaOk = await verifyCaptcha(captchaToken);
-    if (!captchaOk) {
-      return NextResponse.json(
-        { error: "Captcha verification failed. Please try again." },
-        { status: 422 }
-      );
-    }
-  }
-
-  // 4. Resolve redirect URL — null means the env var is not configured yet.
+  // 3. Resolve redirect URL — null means the env var is not configured yet.
   //    In production this is a hard error; in dev we still return success so
   //    the lead capture flow can be tested without all env vars set.
   const redirectUrl = buildRedirectUrl(destination);
@@ -198,7 +152,6 @@ async function handlePost(req: NextRequest, body: unknown): Promise<Response> {
         email,
         phone,
         consent,
-        captcha_token: captchaToken ?? null,
         source: destination,
         ip_address: ip,
       },
