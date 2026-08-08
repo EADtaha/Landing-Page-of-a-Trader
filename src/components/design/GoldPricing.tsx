@@ -22,9 +22,23 @@ interface GoldPricingProps {
   onOpenModal: (destination: RedirectDestination) => void;
 }
 
+interface Tier {
+  id: string;
+  name: string;
+  tag: string | null;
+  price: string;
+  strikethrough: string | null;
+  per: string;
+  highlight: boolean;
+  destination: RedirectDestination;
+  cta: string;
+  advantage: string;
+  features: readonly string[];
+}
+
 // ─── Tier definitions ──────────────────────────────────────────────────────
 // Prices per design.md spec
-const TIERS = [
+const TIERS: Tier[] = [
   {
     id:            'vip' as const,
     name:          'VIP TELEGRAM',
@@ -97,7 +111,7 @@ const TIERS = [
       'Withdraw anytime',
     ],
   },
-] as const;
+];
 
 // ─── Card ─────────────────────────────────────────────────────────────────
 
@@ -105,7 +119,7 @@ function PricingCard({
   tier,
   onOpenModal,
 }: {
-  tier: (typeof TIERS)[number];
+  tier: Tier;
   onOpenModal: (d: RedirectDestination) => void;
 }) {
   return (

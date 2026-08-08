@@ -98,8 +98,9 @@
   .border-base-border    { border-color: var(--color-base-border); }
   .border-base-border-gold { border-color: var(--color-base-border-gold); }
   .border-accent-gold    { border-color: var(--color-accent-gold); }
-  .border-accent-gold/20 { border-color: rgba(212, 175, 55, 0.2); }
-  .border-accent-gold/60 { border-color: rgba(212, 175, 55, 0.6); }
+  /* Note: opacity modifiers like border-accent-gold/20 and border-accent-gold/60
+     are handled natively by Tailwind v4 via the @theme --color-accent-gold token.
+     Do NOT declare them as manual CSS classes here. */
 
   /* Shadow utilities */
   .shadow-soft { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
