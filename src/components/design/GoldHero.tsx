@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import Image from "next/image";
-import SpinningGoldBar from "./SpinningGoldBar";
 import BackgroundChart from "./BackgroundChart";
 import MarketTicker from "./MarketTicker";
 import type { RedirectDestination } from "@/lib/validations/lead";
@@ -34,19 +33,14 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
         <BackgroundChart />
 
         {/* Main content container */}
-        <div className="relative z-10 w-full max-w-7xl px-6 py-20 lg:px-12">
+        <div className="relative z-10 w-full max-w-7xl px-6 pt-36 pb-20 md:pt-44 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             
-            {/* Left Column: 3D Gold Bar + Text (8 columns on desktop) */}
+            {/* Left Column: Text (7 columns on desktop) */}
             <div className="lg:col-span-7 flex flex-col items-start text-left space-y-8">
               
-              {/* 3D Gold Bar Hook */}
-              <div className="hidden lg:block">
-                <SpinningGoldBar />
-              </div>
-              
-              {/* Live Signal Badge (smaller on desktop, hidden on mobile) */}
-              <div className="hidden lg:flex items-center gap-2 rounded-full px-4 py-2">
+              {/* Live Signal Badge */}
+              <div className="flex items-center gap-2 rounded-full px-4 py-2">
                 <div
                   className="h-2 w-2 rounded-full bg-signal-green animate-pulse"
                   aria-hidden="true"
@@ -109,11 +103,6 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
                 >
                   Explore Services
                 </a>
-              </div>
-
-              {/* Mobile-only 3D Gold Bar (below CTAs on mobile) */}
-              <div className="lg:hidden mt-4">
-                <SpinningGoldBar />
               </div>
 
             </div>

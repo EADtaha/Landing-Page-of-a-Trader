@@ -1,90 +1,171 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 // ---------------------------------------------------------------------------
-// BackgroundChart — ambient SVG chart pattern for hero background
-// Subtle 10-15% opacity with radial gradient mask for readability
+// BackgroundChart — live-scrolling XAU/USD price line on HTML5 canvas
+// Runs at 60 FPS with requestAnimationFrame. Absolute z-0, pointer-events-none.
+// Text readability preserved via a white/offwhite radial overlay on top.
 // ---------------------------------------------------------------------------
 
 export default function BackgroundChart() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Resize canvas to fill parent
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+
+    // ----- Price data -----
+    // Simulate a scrolling XAU/USD line using a random walk seeded with
+    // realistic price levels. This is decorative only — not real market data.
+    const NUM_POINTS = 200;
+    const prices: number[] = [];
+    let base = 0.5; // normalised 0-1
+    for (let i = 0; i < NUM_POINTS; i++) {
+      base += (Math.random() - 0.5) * 0.04;
+      base = Math.max(0.15, Math.min(0.85, base));
+      prices.push(base);
+    }
+
+    let offset = 0;           // horizontal scroll position (pixels)
+    let tickTimer = 0;        // counter for pulse ticks
+    let lastPulseX = -1;      // x-position of the last green tick pulse
+    let pulseRadius = 0;      // growing circle radius for tick pulse
+    let rafId: number;
+
+    const GOLD   = "#D4AF37";
+    const GREEN  = "#00C853";
+    const GOLD_A = "rgba(212,175,55,";
+    const SPEED  = 0.6;       // px per frame — slow ambient drift
+
+    const draw = () => {
+      const W = canvas.width;
+      const H = canvas.height;
+      if (W === 0 || H === 0) { rafId = requestAnimationFrame(draw); return; }
+
+      ctx.clearRect(0, 0, W, H);
+
+      const STEP = W / (NUM_POINTS - 1);  // pixels between data points
+
+      // --- Grid lines (very faint) ---
+      ctx.strokeStyle = "rgba(212,175,55,0.06)";
+      ctx.lineWidth = 0.5;
+      for (let row = 0; row < 6; row++) {
+        const y = (row / 5) * H;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+      for (let col = 0; col < 9; col++) {
+        const x = (col / 8) * W;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+
+      // --- Area fill under the price line ---
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, GOLD_A + "0.12)");
+      grad.addColorStop(1, GOLD_A + "0.0)");
+
+      ctx.beginPath();
+      for (let i = 0; i < NUM_POINTS; i++) {
+        const x = i * STEP - (offset % STEP) + (offset % STEP) * 0;
+        // Shift x by the scroll offset wrapping NUM_POINTS cyclically
+        const idx = (i + Math.floor(offset / STEP)) % NUM_POINTS;
+        const y = H - prices[idx] * H * 0.6 - H * 0.15;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // --- Price line ---
+      ctx.beginPath();
+      ctx.strokeStyle = GOLD;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = GOLD_A + "0.35)";
+      ctx.shadowBlur = 8;
+      for (let i = 0; i < NUM_POINTS; i++) {
+        const x = i * STEP - (offset % STEP);
+        const idx = (i + Math.floor(offset / STEP)) % NUM_POINTS;
+        const y = H - prices[idx] * H * 0.6 - H * 0.15;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // --- Live price dot at right edge ---
+      const lastIdx = (NUM_POINTS - 1 + Math.floor(offset / STEP)) % NUM_POINTS;
+      const dotY = H - prices[lastIdx] * H * 0.6 - H * 0.15;
+      const dotX = W - 4;
+
+      // Pulse ring
+      tickTimer++;
+      if (tickTimer % 90 === 0) {
+        lastPulseX = dotX;
+        pulseRadius = 0;
+      }
+      if (pulseRadius < 20) {
+        pulseRadius += 0.4;
+        const alpha = 1 - pulseRadius / 20;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, pulseRadius * 2, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0,200,83,${alpha * 0.6})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Solid dot
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+      ctx.fillStyle = GREEN;
+      ctx.shadowColor = "rgba(0,200,83,0.8)";
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // --- Advance scroll ---
+      offset += SPEED;
+
+      rafId = requestAnimationFrame(draw);
+    };
+
+    rafId = requestAnimationFrame(draw);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
+  }, []);
+
   return (
     <div
-      className="absolute inset-0 overflow-hidden pointer-events-none z-0"
+      className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
       aria-hidden="true"
     >
-      {/* Radial gradient mask - white center fading to transparent */}
+      {/* Canvas — fills the section */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full opacity-[0.55]"
+        style={{ display: "block" }}
+      />
+
+      {/* Soft white radial overlay keeps headline 100% readable */}
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0) 70%)',
+          background:
+            "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(249,249,251,0.88) 0%, rgba(249,249,251,0.60) 55%, rgba(249,249,251,0) 100%)",
         }}
       />
-
-      {/* Chart SVG with animated path */}
-      <svg
-        className="absolute inset-0 h-full w-full opacity-12"
-        preserveAspectRatio="none"
-        viewBox="0 0 1000 500"
-      >
-        <defs>
-          <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
-          </linearGradient>
-          <pattern id="gridPattern" width="50" height="50" patternUnits="userSpaceOnUse">
-            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(212,175,55,0.1)" strokeWidth="0.5" />
-          </pattern>
-        </defs>
-
-        {/* Grid background */}
-        <rect width="100%" height="100%" fill="url(#gridPattern)" />
-
-        {/* Candle stick pattern (decorative) */}
-        <g fill="#D4AF37" stroke="#D4AF37" strokeOpacity="0.4">
-          {/* Candle 1 */}
-          <line x1="80" y1="200" x2="80" y2="350" strokeWidth="4" />
-          <rect x="65" y="240" width="30" height="80" rx="4" fillOpacity="0.6" />
-          {/* Candle 2 */}
-          <line x1="180" y1="180" x2="180" y2="320" strokeWidth="4" />
-          <rect x="165" y="220" width="30" height="60" rx="4" fillOpacity="0.6" />
-          {/* Candle 3 */}
-          <line x1="280" y1="220" x2="280" y2="380" strokeWidth="4" />
-          <rect x="265" y="260" width="30" height="100" rx="4" fillOpacity="0.6" />
-          {/* Candle 4 */}
-          <line x1="380" y1="150" x2="380" y2="300" strokeWidth="4" />
-          <rect x="365" y="180" width="30" height="90" rx="4" fillOpacity="0.6" />
-          {/* Candle 5 */}
-          <line x1="480" y1="100" x2="480" y2="280" strokeWidth="4" />
-          <rect x="465" y="140" width="30" height="120" rx="4" fillOpacity="0.6" />
-          {/* Candle 6 */}
-          <line x1="580" y1="120" x2="580" y2="260" strokeWidth="4" />
-          <rect x="565" y="150" width="30" height="80" rx="4" fillOpacity="0.6" />
-          {/* Candle 7 */}
-          <line x1="680" y1="140" x2="680" y2="320" strokeWidth="4" />
-          <rect x="665" y="180" width="30" height="120" rx="4" fillOpacity="0.6" />
-          {/* Candle 8 */}
-          <line x1="780" y1="180" x2="780" y2="340" strokeWidth="4" />
-          <rect x="765" y="220" width="30" height="90" rx="4" fillOpacity="0.6" />
-          {/* Candle 9 */}
-          <line x1="880" y1="200" x2="880" y2="360" strokeWidth="4" />
-          <rect x="865" y="240" width="30" height="100" rx="4" fillOpacity="0.6" />
-        </g>
-
-        {/* Trend line with gradient fill */}
-        <path
-          d="M 0 380 C 150 360 250 420 400 340 C 550 260 650 380 800 300 L 1000 280 L 1000 500 L 0 500 Z"
-          fill="url(#chartGradient)"
-          className="animate-draw-chart"
-        />
-        <path
-          d="M 0 380 C 150 360 250 420 400 340 C 550 260 650 380 800 300 L 1000 280"
-          fill="none"
-          stroke="#D4AF37"
-          strokeWidth="2"
-          strokeDasharray="10 5"
-          className="animate-draw-chart"
-          style={{ animationDelay: '0.5s' }}
-        />
-      </svg>
     </div>
   );
 }
