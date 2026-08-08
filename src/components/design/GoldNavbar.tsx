@@ -18,9 +18,9 @@ export default function GoldNavbar() {
     <nav
       className="fixed top-0 left-0 right-0 z-40 transition-all duration-300"
       style={{
-        background: scrolled ? 'rgba(8,8,8,0.95)' : 'transparent',
+        background: scrolled ? 'rgba(255,255,255,0.95)' : 'transparent',
         backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(201,168,76,0.12)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(229, 231, 235, 1)' : 'none',
       }}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -34,9 +34,9 @@ export default function GoldNavbar() {
             priority
           />
         </a>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
-          {['#about', '#results', '#pricing', '#faq'].map((href) => (
-            <a key={href} href={href} className="hover:text-white transition-colors capitalize">
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-base-charcoal-muted">
+          {['#about', '#proof', '#services', '#faq'].map((href) => (
+            <a key={href} href={href} className="hover:text-accent-gold transition-colors capitalize">
               {href.slice(1)}
             </a>
           ))}
@@ -46,9 +46,9 @@ export default function GoldNavbar() {
           target="_blank"
           rel="noopener noreferrer"
           className="hidden md:flex items-center gap-2 text-sm font-semibold rounded-full px-5 py-2 transition-all duration-200 hover:scale-[1.03]"
-          style={{ background: 'linear-gradient(135deg,#C9A84C,#E8C97A)', color: '#080808' }}
+          style={{ background: 'linear-gradient(135deg, #C5A028, #D4AF37)', color: '#0D0E12' }}
         >
-          Join Now
+          Join Free
         </a>
       </div>
     </nav>

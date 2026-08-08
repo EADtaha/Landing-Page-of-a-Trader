@@ -9,7 +9,7 @@ function useReveal() {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) el.classList.add('visible'); },
+      ([e]) => { if (e.isIntersecting) el.classList.add('section-reveal'); },
       { threshold: 0.12 }
     );
     obs.observe(el);
@@ -23,13 +23,12 @@ interface GoldPricingProps {
 }
 
 // ─── Tier definitions ──────────────────────────────────────────────────────
-
+// Prices per design.md spec
 const TIERS = [
   {
     id:            'vip' as const,
-    icon:          '◈',
     name:          'VIP TELEGRAM',
-    tag:           'Most Popular',
+    tag:           null,
     price:         '$90',
     strikethrough: null,
     per:           '/month',
@@ -46,9 +45,8 @@ const TIERS = [
   },
   {
     id:            'course' as const,
-    icon:          '◇',
     name:          'FULL COURSE',
-    tag:           'Lifetime Value',
+    tag:           null,
     price:         '$149',
     strikethrough: '$297',
     per:           'one-time payment',
@@ -65,7 +63,6 @@ const TIERS = [
   },
   {
     id:            'mentorship' as const,
-    icon:          '⬡',
     name:          '1-ON-1 COACHING',
     tag:           'LIMITED PROMO',
     price:         '$400',
@@ -84,9 +81,8 @@ const TIERS = [
   },
   {
     id:            'copy' as const,
-    icon:          '✦',
     name:          'COPY TRADING',
-    tag:           'Hands-Free',
+    tag:           null,
     price:         'FREE',
     strikethrough: null,
     per:           'Min. Capital: $300',
@@ -114,53 +110,45 @@ function PricingCard({
 }) {
   return (
     <div
-      className="relative rounded-3xl p-7 flex flex-col transition-all duration-300 hover:-translate-y-1"
+      className="relative rounded-3xl p-7 flex flex-col transition-all duration-300 hover:-translate-y-1 border"
       style={
         tier.highlight
           ? {
-              background: 'linear-gradient(135deg,rgba(201,168,76,0.13),rgba(201,168,76,0.06))',
-              border: '1px solid rgba(201,168,76,0.55)',
-              boxShadow: '0 0 60px rgba(201,168,76,0.14), 0 20px 60px rgba(0,0,0,0.5)',
+              background: '#FFFFFF',
+              border: '1px solid rgba(212, 175, 55, 0.6)',
+              boxShadow: '0 12px 40px rgba(212, 175, 55, 0.15)',
             }
           : {
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              backdropFilter: 'blur(20px)',
+              background: '#FFFFFF',
+              border: '1px solid rgba(229, 231, 235, 1)',
+              boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)',
             }
       }
     >
-      {/* Popular badge */}
+      {/* Promo badge for highlighted tier */}
       {tier.highlight && (
         <div
-          className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold tracking-wide"
-          style={{ background: 'linear-gradient(135deg,#C9A84C,#E8C97A)', color: '#080808' }}
+          className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #C5A028, #D4AF37)', color: '#0D0E12' }}
         >
           {tier.tag}
         </div>
       )}
 
-      {/* Tag (non-highlight) */}
-      {!tier.highlight && (
+      {/* Tag for non-highlighted tiers */}
+      {!tier.highlight && tier.tag && (
         <div
           className="text-[10px] font-bold uppercase tracking-widest mb-4"
-          style={{ color: 'rgba(201,168,76,0.55)' }}
+          style={{ color: "#D4AF37" }}
         >
           {tier.tag}
         </div>
       )}
-      {tier.highlight && <div className="mb-4" />}
-
-      {/* Icon */}
-      <div
-        className="text-2xl mb-3"
-        style={{ color: tier.highlight ? '#C9A84C' : 'rgba(201,168,76,0.4)' }}
-      >
-        {tier.icon}
-      </div>
+      {!tier.highlight && !tier.tag && <div className="mb-4" />}
 
       {/* Name */}
       <h3
-        className="font-display font-bold text-white text-xl mb-1"
+        className="font-display font-bold text-base-charcoal text-xl mb-1"
         style={{ fontStyle: 'italic' }}
       >
         {tier.name}
@@ -169,7 +157,10 @@ function PricingCard({
       {/* Price — with optional strikethrough original price */}
       <div className="mb-2 mt-2">
         {tier.strikethrough && (
-          <span className="line-through text-white/40 text-lg mr-2 font-mono-data">
+          <span
+            className="line-through text-base-charcoal-muted text-lg mr-2 font-mono-data"
+            style={{ color: "rgba(113, 115, 124, 0.5)" }}
+          >
             {tier.strikethrough}
           </span>
         )}
@@ -178,30 +169,29 @@ function PricingCard({
             className="font-display font-black leading-none"
             style={{
               fontSize: '2rem',
-              color: tier.highlight ? '#C9A84C' : '#ffffff',
+              color: tier.highlight ? '#D4AF37' : '#0D0E12',
               fontStyle: 'italic',
             }}
           >
             {tier.price}
           </span>
-          <span className="text-white/30 text-sm">{tier.per}</span>
+          <span className="text-base-charcoal-muted text-sm">{tier.per}</span>
         </div>
       </div>
 
       {/* Advantage tag */}
-      <p className="text-xs mb-5 leading-relaxed" style={{ color: 'rgba(201,168,76,0.6)' }}>
+      <p className="text-sm mb-5 leading-relaxed" style={{ color: '#4A4C54' }}>
         {tier.advantage}
       </p>
 
       {/* Feature list */}
-      <ul className="flex-1 space-y-2.5 mb-8">
+      <ul className="flex-1 space-y-3 mb-8">
         {tier.features.map((f) => (
-          <li key={f} className="flex items-start gap-2.5 text-sm text-white/60">
+          <li key={f} className="flex items-start gap-3 text-sm text-base-charcoal-muted">
             <svg
-              width="14" height="14" viewBox="0 0 24 24"
-              fill="none" stroke="#C9A84C" strokeWidth="2.5"
+              width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke={tier.highlight ? "#D4AF37" : "#71737C"} strokeWidth="2.5"
               className="mt-0.5 flex-shrink-0"
-              opacity={tier.highlight ? 1 : 0.7}
               aria-hidden="true"
             >
               <polyline points="20 6 9 17 4 12" />
@@ -218,14 +208,14 @@ function PricingCard({
         style={
           tier.highlight
             ? {
-                background: 'linear-gradient(135deg,#C9A84C,#E8C97A)',
-                color: '#080808',
-                boxShadow: '0 8px 24px rgba(201,168,76,0.35)',
+                background: 'linear-gradient(135deg, #C5A028, #D4AF37)',
+                color: '#0D0E12',
+                boxShadow: '0 8px 24px rgba(212, 175, 55, 0.35)',
               }
             : {
-                border: '1px solid rgba(201,168,76,0.25)',
-                color: '#C9A84C',
                 background: 'transparent',
+                border: '1px solid rgba(212, 175, 55, 0.3)',
+                color: '#D4AF37',
               }
         }
       >
@@ -242,53 +232,41 @@ export default function GoldPricing({ onOpenModal }: GoldPricingProps) {
 
   return (
     <section
-      id="pricing"
-      className="py-32 px-6 relative overflow-hidden"
-      style={{ background: 'linear-gradient(180deg,#0A0A0A 0%,#0D0C09 50%,#0A0A0A 100%)' }}
+      id="services"
+      className="py-24 px-6 relative overflow-hidden"
+      style={{ background: '#FFFFFF' }}
     >
-      {/* Radial glow */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        style={{
-          width: '700px',
-          height: '700px',
-          background: 'radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%)',
-          borderRadius: '50%',
-        }}
-        aria-hidden="true"
-      />
-
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div ref={ref} className="section-reveal text-center mb-16">
           <div
             className="inline-block text-xs font-semibold tracking-widest uppercase mb-4 px-4 py-1.5 rounded-full"
-            style={{ color: '#C9A84C', border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(201,168,76,0.05)' }}
+            style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)', background: 'rgba(212,175,55,0.08)' }}
           >
-            Membership &amp; Services
+            Services &amp; Membership
           </div>
           <h2
-            className="font-display font-bold text-white leading-tight"
+            className="font-display font-bold text-base-charcoal leading-tight mb-4"
             style={{ fontSize: 'clamp(2rem,4vw,3.5rem)', letterSpacing: '-0.02em' }}
           >
             Choose your level.
           </h2>
-          <p className="text-white/40 mt-4 text-base max-w-lg mx-auto">
+          <p className="text-base-charcoal-muted text-lg max-w-2xl mx-auto">
             From live signals to full mentorship — every tier is designed for a different
             stage of your trading journey. All CTAs collect your details first so we can
             personalise your onboarding.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-          {TIERS.map((tier) => (
+        {/* Cards - Desktop 2x2, Mobile single column */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 xl:grid-cols-4">
+          {TIERS.map((tier, i) => (
             <PricingCard key={tier.id} tier={tier} onOpenModal={onOpenModal} />
           ))}
         </div>
 
         {/* Legal note */}
-        <p className="mt-10 text-center text-xs text-white/20">
+        <p className="mt-12 text-center text-xs text-base-metadata">
           All subscriptions are activated via Telegram or WhatsApp after form submission.
           No payment is processed on this website. Prices shown are indicative — contact
           for current availability.

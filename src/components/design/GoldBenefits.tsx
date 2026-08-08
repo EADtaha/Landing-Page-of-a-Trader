@@ -9,7 +9,7 @@ function useReveal() {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) el.classList.add('visible'); },
+      ([e]) => { if (e.isIntersecting) el.classList.add('section-reveal'); },
       { threshold: 0.12 }
     );
     obs.observe(el);
@@ -56,50 +56,50 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
 
   return (
     <section
-      id="advantages"
-      className="py-32 px-6"
-      style={{ background: '#ffffff', borderTop: '1px solid rgba(0,0,0,0.06)' }}
+      id="community"
+      className="py-24 px-6 bg-base-offwhite"
+      style={{ borderTop: '1px solid rgba(229, 231, 235, 1)' }}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div ref={ref} className="section-reveal text-center mb-16">
           <div
             className="inline-block text-xs font-semibold tracking-widest uppercase mb-4 px-4 py-1.5 rounded-full"
-            style={{ color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)', background: 'rgba(201,168,76,0.05)' }}
+            style={{ color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.25)', background: 'rgba(212, 175, 55, 0.08)' }}
           >
             Why YassICTFX
           </div>
           <h2
-            className="font-display font-bold text-black leading-tight"
+            className="font-display font-bold text-base-charcoal leading-tight"
             style={{ fontSize: 'clamp(2rem,4vw,3.5rem)', letterSpacing: '-0.02em' }}
           >
             Advantages of Joining.
           </h2>
-          <p className="text-black/40 mt-4 text-base max-w-xl mx-auto">
+          <p className="text-base-charcoal-muted mt-4 text-base max-w-xl mx-auto">
             Not another signal group. A complete ecosystem built around one goal — making you a
             consistently profitable trader with a real edge.
           </p>
         </div>
 
         {/* 4-card grid */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {ADVANTAGES.map((a) => {
             const Icon = a.Icon;
             return (
             <div
               key={a.title}
-              className="relative p-8 rounded-2xl group transition-all duration-300 hover:-translate-y-1"
+              className="relative p-8 rounded-2xl group transition-all duration-300 hover:-translate-y-1 border"
               style={
                 a.highlight
                   ? {
-                      background: 'linear-gradient(135deg,rgba(201,168,76,0.10),rgba(201,168,76,0.04))',
-                      border: '1px solid rgba(201,168,76,0.4)',
-                      boxShadow: '0 0 40px rgba(201,168,76,0.08), 0 8px 32px rgba(0,0,0,0.08)',
+                      background: '#FFFFFF',
+                      border: '1px solid rgba(212, 175, 55, 0.4)',
+                      boxShadow: '0 12px 40px rgba(212, 175, 55, 0.12), 0 8px 32px rgba(0,0,0,0.08)',
                     }
                   : {
-                      background: '#F8F6F0',
-                      border: '1px solid rgba(201,168,76,0.12)',
+                      background: '#FFFFFF',
+                      border: '1px solid rgba(229, 231, 235, 1)',
                     }
               }
             >
@@ -107,31 +107,31 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
               <div
                 className="inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-5"
                 style={{
-                  color: '#C9A84C',
-                  border: '1px solid rgba(201,168,76,0.3)',
-                  background: 'rgba(201,168,76,0.06)',
+                  color: '#D4AF37',
+                  border: '1px solid rgba(212, 175, 55, 0.25)',
+                  background: 'rgba(212, 175, 55, 0.08)',
                 }}
               >
                 {a.tag}
               </div>
 
               <div className="flex items-start gap-5">
-                {/* Lucide icon */}
+                {/* Icon */}
                 <div
                   className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-                  style={{ background: 'rgba(201,168,76,0.10)', border: '1px solid rgba(201,168,76,0.2)' }}
+                  style={{ background: a.highlight ? 'rgba(212, 175, 55, 0.1)' : 'rgba(212, 175, 55, 0.06)', border: '1px solid rgba(212, 175, 55, 0.2)' }}
                 >
-                  <Icon className="w-6 h-6" style={{ color: '#C9A84C' }} strokeWidth={1.5} aria-hidden="true" />
+                  <Icon className="w-6 h-6" style={{ color: a.highlight ? '#D4AF37' : '#71737C' }} strokeWidth={1.5} aria-hidden="true" />
                 </div>
 
                 <div>
                   <h3
-                    className="font-display font-bold text-black text-xl mb-2 leading-tight"
+                    className="font-display font-bold text-base-charcoal text-xl mb-2 leading-tight"
                     style={{ fontStyle: 'italic' }}
                   >
                     {a.title}
                   </h3>
-                  <p className="text-black/55 text-sm leading-relaxed">{a.desc}</p>
+                  <p className="text-base-charcoal-muted text-sm leading-relaxed">{a.desc}</p>
                 </div>
               </div>
             </div>
@@ -141,10 +141,10 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
 
         {/* Bottom CTA strip */}
         <div
-          className="mt-14 p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6"
+          className="p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6"
           style={{
-            background: 'linear-gradient(135deg,#0A0A0A,#141414)',
-            border: '1px solid rgba(201,168,76,0.2)',
+            background: 'linear-gradient(135deg, #C5A028, #D4AF37)',
+            border: '1px solid rgba(212, 175, 55, 0.3)',
           }}
         >
           <div>
@@ -154,7 +154,7 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
             >
               Join 1,700+ traders already profiting.
             </div>
-            <div className="text-white/40 text-sm">
+            <div className="text-white/70 text-sm">
               Active community · New signals daily · Zero fluff
             </div>
           </div>
@@ -163,9 +163,9 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
               onClick={onOpenModal}
               className="flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm transition-all hover:scale-[1.03] flex-shrink-0"
               style={{
-                background: 'linear-gradient(135deg,#C9A84C,#E8C97A)',
-                color: '#080808',
-                boxShadow: '0 8px 24px rgba(201,168,76,0.3)',
+                background: '#0D0E12',
+                color: '#FFFFFF',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -180,9 +180,9 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm transition-all hover:scale-[1.03] flex-shrink-0"
               style={{
-                background: 'linear-gradient(135deg,#C9A84C,#E8C97A)',
-                color: '#080808',
-                boxShadow: '0 8px 24px rgba(201,168,76,0.3)',
+                background: '#0D0E12',
+                color: '#FFFFFF',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
               }}
             >
               Join Free Now

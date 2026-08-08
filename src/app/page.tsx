@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FloatingTelegramBtn  from "@/components/design/FloatingTelegramBtn";
 import GoldNavbar           from "@/components/design/GoldNavbar";
 import GoldHero             from "@/components/design/GoldHero";
 import GoldAbout            from "@/components/design/GoldAbout";
@@ -28,22 +27,28 @@ export default function Page() {
 
   return (
     <div
-      style={{ background: "#080808", minHeight: "100vh" }}
-      className="selection:bg-[rgba(201,168,76,0.25)] selection:text-[#E8C97A]"
+      style={{ background: "#FFFFFF", minHeight: "100vh" }}
+      className="selection:bg-[rgba(212,175,55,0.2)] selection:text-[#0D0E12]"
     >
-      {/* FloatingTelegramBtn only renders client-side to avoid scroll-state mismatch */}
-      {mounted && <FloatingTelegramBtn />}
-
       <GoldNavbar />
 
       <main>
-        <GoldHero  onOpenModal={() => openModal("free_telegram")} />
+        {/* 1. HERO SECTION */}
+        <GoldHero  onOpenModal={(d) => openModal(d)} />
+        
+        {/* 2. ABOUT / TRADER BEHIND SYSTEM */}
         <GoldAbout />
+        
+        {/* 3. PROOF OVER PROMISES */}
         <ResultsCarousel />
-        {/* GoldPricing: each card CTA calls openModal with its own destination */}
+        
+        {/* 4. SERVICES GRID */}
         <GoldPricing onOpenModal={openModal} />
-        {/* GoldBenefits: bottom strip CTA opens modal */}
+        
+        {/* 5. WHY YASSICTFX / COMMUNITY */}
         <GoldBenefits onOpenModal={() => openModal("free_telegram")} />
+        
+        {/* 6. FAQ */}
         <GoldFAQ />
       </main>
 
