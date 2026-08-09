@@ -3,177 +3,218 @@
 import { useEffect, useState } from "react";
 
 // ---------------------------------------------------------------------------
-// MarketTicker — Live market data with hydration-safe architecture
-// - Server-side: Static fallback snapshot
-// - Client-side: WebSocket connection after hydration
+// MarketTicker — Hydration-safe live market data bar
+//
+// Architecture:
+//  - Initial render uses STATIC_FALLBACK so SSR and client HTML match exactly
+//    (avoids Next.js hydration mismatch).
+//  - After mount, fetches real XAU/USD from goldprice.dev (free, no API key)
+//    and real FX rates from Frankfurter API, polling every 5 s.
+//  - DXY and S&P 500 are not available on free public APIs; they show
+//    "—" when live data is unavailable.
 // ---------------------------------------------------------------------------
 
-// Static fallback data for SSR/hydration safety
-const STATIC_FALLBACK = [
-  { symbol: "XAU/USD", price: "2,387.42", change: "+2.34%", positive: true },
-  { symbol: "XAG/USD", price: "28.45", change: "+1.12%", positive: true },
-  { symbol: "DXY", price: "104.23", change: "-0.43%", positive: false },
-  { symbol: "S&P 500", price: "5,240.18", change: "+0.87%", positive: true },
-  { symbol: "OIL", price: "78.45", change: "-1.20%", positive: false },
-  { symbol: "BTC", price: "68,450.22", change: "+4.55%", positive: true },
-  { symbol: "ETH", price: "3,450.12", change: "+2.18%", positive: true },
-  { symbol: "GOLD FUTURES", price: "2,390.15", change: "+2.10%", positive: true },
-];
-
-interface MarketData {
-  symbol: string;
-  price: string;
-  change: string;
+interface MarketItem {
+  symbol:   string;
+  price:    string;
+  change:   string;
   positive: boolean;
 }
 
+const STATIC_FALLBACK: MarketItem[] = [
+  { symbol: "XAU/USD",  price: "—",       change: "—",      positive: true  },
+  { symbol: "EUR/USD",  price: "—",       change: "—",      positive: true  },
+  { symbol: "GBP/USD",  price: "—",       change: "—",      positive: true  },
+  { symbol: "DXY",      price: "—",       change: "—",      positive: false },
+  { symbol: "S&P 500",  price: "—",       change: "—",      positive: true  },
+  { symbol: "BTC/USD",  price: "—",       change: "—",      positive: true  },
+  { symbol: "OIL (WTI)",price: "—",       change: "—",      positive: false },
+  { symbol: "GOLD FUT", price: "—",       change: "—",      positive: true  },
+];
+
+// Fetch XAU/USD spot from goldprice.dev (free, no key, ~1 min latency)
+async function fetchGold(): Promise<{ price: number } | null> {
+  try {
+    const res = await fetch(
+      "https://goldprice.dev/v1/prices?symbol=XAU-USD-SPOT",
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    // Response: { price: number, bid: number, ask: number, computed_at: string }
+    if (typeof data?.price === "number") return { price: data.price };
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Fetch EUR/USD and GBP/USD from Frankfurter (free, no key)
+async function fetchFx(): Promise<{ eur: number; gbp: number } | null> {
+  try {
+    const res = await fetch(
+      "https://api.frankfurter.app/latest?from=USD&to=EUR,GBP",
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const eur = data?.rates?.EUR;
+    const gbp = data?.rates?.GBP;
+    if (typeof eur === "number" && typeof gbp === "number") {
+      // Frankfurter gives USD → EUR; invert for EUR/USD
+      return { eur: 1 / eur, gbp: 1 / gbp };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function fmt(n: number, decimals = 2): string {
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
+function getSession(): "LONDON" | "NEW YORK" | "ASIAN" | null {
+  const hour = new Date().getUTCHours();
+  if (hour >= 8 && hour < 17) return "LONDON";
+  if (hour >= 13 && hour < 22) return "NEW YORK";
+  if (hour >= 0  && hour < 8 ) return "ASIAN";
+  return null;
+}
+
 export default function MarketTicker() {
-  const [data, setData] = useState<MarketData[]>(STATIC_FALLBACK);
+  // Start with static fallback — never causes hydration mismatch
+  const [items, setItems]     = useState<MarketItem[]>(STATIC_FALLBACK);
   const [session, setSession] = useState<"LONDON" | "NEW YORK" | "ASIAN" | null>(null);
 
-  // Determine current session based on UTC time
   useEffect(() => {
-    const getSession = (): "LONDON" | "NEW YORK" | "ASIAN" | null => {
-      const hour = new Date().getUTCHours();
-      // London: 8:00-17:00 UTC
-      if (hour >= 8 && hour < 17) return "LONDON";
-      // New York: 13:00-22:00 UTC
-      if (hour >= 13 && hour < 22) return "NEW YORK";
-      // Asian: 0:00-8:00 UTC
-      if (hour >= 0 && hour < 8) return "ASIAN";
-      return null;
-    };
-
+    // Session is client-only (depends on current time)
     setSession(getSession());
+
+    let prevGold = 0;
+    let prevEur  = 0;
+    let prevGbp  = 0;
+
+    async function refresh() {
+      const [gold, fx] = await Promise.all([fetchGold(), fetchFx()]);
+
+      setItems(prev => prev.map(item => {
+        switch (item.symbol) {
+          case "XAU/USD": {
+            if (!gold) return item;
+            const p    = gold.price;
+            const diff = prevGold ? ((p - prevGold) / prevGold) * 100 : 0;
+            prevGold   = p;
+            return {
+              ...item,
+              price:    `$${fmt(p, 2)}`,
+              change:   prevGold === p ? item.change : `${diff >= 0 ? "+" : ""}${diff.toFixed(2)}%`,
+              positive: diff >= 0,
+            };
+          }
+          case "EUR/USD": {
+            if (!fx) return item;
+            const p    = fx.eur;
+            const diff = prevEur ? ((p - prevEur) / prevEur) * 100 : 0;
+            prevEur    = p;
+            return {
+              ...item,
+              price:    fmt(p, 4),
+              change:   prevEur === p ? item.change : `${diff >= 0 ? "+" : ""}${diff.toFixed(3)}%`,
+              positive: diff >= 0,
+            };
+          }
+          case "GBP/USD": {
+            if (!fx) return item;
+            const p    = fx.gbp;
+            const diff = prevGbp ? ((p - prevGbp) / prevGbp) * 100 : 0;
+            prevGbp    = p;
+            return {
+              ...item,
+              price:    fmt(p, 4),
+              change:   prevGbp === p ? item.change : `${diff >= 0 ? "+" : ""}${diff.toFixed(3)}%`,
+              positive: diff >= 0,
+            };
+          }
+          default:
+            return item;
+        }
+      }));
+    }
+
+    refresh();
+    const id = setInterval(refresh, 5_000);
+    return () => clearInterval(id);
   }, []);
 
-  // WebSocket simulation for production (replace with actual socket implementation)
-  useEffect(() => {
-    // Only connect after client hydration to avoid hydration mismatch
-    const connectWebSocket = () => {
-      // In production, replace this with actual WebSocket connection
-      // Example: const ws = new WebSocket('wss://api.example.com/market');
-      
-      // For now, simulate live updates with a random walk
-      const interval = setInterval(() => {
-        setData(prev => prev.map(item => {
-          // Small random change to simulate live market
-          const changeMultiplier = Math.random() > 0.5 ? 1 : -1;
-          const changeAmount = (Math.random() * 0.05).toFixed(2);
-          const newChange = `${changeMultiplier > 0 ? '+' : ''}${changeAmount}%`;
-          
-          return {
-            ...item,
-            price: item.price, // Keep stable for demo
-            change: newChange,
-            positive: changeMultiplier > 0,
-          };
-        }));
-      }, 3000);
-
-      return () => clearInterval(interval);
-    };
-
-    const cleanup = connectWebSocket();
-    return cleanup;
-  }, []);
+  // Duplicate items for seamless CSS ticker loop
+  const all = [...items, ...items];
 
   return (
     <div
-      className="ticker-wrap overflow-hidden"
+      className="w-full overflow-hidden"
       style={{
-        background: "rgba(255,255,255,0.95)",
-        borderBottom: "1px solid rgba(212,175,55,0.2)",
+        background:   "#FFFFFF",
+        borderBottom: "1px solid rgba(229,231,235,1)",
       }}
+      aria-label="Live market ticker"
     >
-      <div className="ticker-inner flex">
-        {/* Session indicator */}
+      <div className="flex items-stretch">
+        {/* Sticky session badge */}
         <div
-          className="flex items-center gap-2 px-6 py-3"
-          style={{ borderRight: "1px solid rgba(212,175,55,0.2)" }}
+          className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5"
+          style={{ borderRight: "1px solid rgba(212,175,55,0.2)", background: "#F9F9FB" }}
         >
           <div
-            className={`h-2.5 w-2.5 rounded-full ${
-              session === "LONDON"
-                ? "bg-[#00C853] animate-pulse"
-                : session === "NEW YORK"
-                ? "bg-[#00C853] animate-pulse"
-                : session === "ASIAN"
-                ? "bg-[#00C853]"
-                : "bg-[#71737C]"
+            className={`h-2 w-2 rounded-full flex-shrink-0 ${
+              session ? "bg-[#00C853] animate-pulse" : "bg-[#71737C]"
             }`}
           />
           <span
-            className="text-xs font-semibold tracking-wider uppercase"
+            className="text-[11px] font-semibold tracking-wider uppercase whitespace-nowrap"
             style={{ color: session ? "#00C853" : "#71737C" }}
           >
-            {session ? `${session} SESSION LIVE` : "MARKET CLOSED"}
+            {session ? `${session} LIVE` : "CLOSED"}
           </span>
         </div>
 
-        {/* Market data */}
-        {data.map((item, i) => (
+        {/* Scrolling ticker */}
+        <div className="ticker-wrap flex-1 overflow-hidden">
           <div
-            key={`${item.symbol}-${i}`}
-            className="flex items-center gap-3 px-6 py-3"
-            style={{
-              borderRight: i < data.length - 1 ? "1px solid rgba(212,175,55,0.1)" : "none",
-            }}
+            className="ticker-inner"
+            style={{ animation: "ticker 28s linear infinite" }}
           >
-            <span
-              className="text-xs font-mono-data font-medium"
-              style={{ color: "#0D0E12" }}
-            >
-              {item.symbol}
-            </span>
-            <span
-              className="text-xs font-mono-data font-bold"
-              style={{ color: "#4A4C54" }}
-            >
-              {item.price}
-            </span>
-            <span
-              className="text-xs font-mono-data"
-              style={{
-                color: item.positive ? "#00C853" : "#FF5252",
-              }}
-            >
-              {item.change}
-            </span>
+            {all.map((item, i) => (
+              <div
+                key={i}
+                className="inline-flex items-center gap-2 px-5 py-2.5"
+                style={{ borderRight: "1px solid rgba(212,175,55,0.08)" }}
+              >
+                <span
+                  className="text-[11px] font-mono-data font-semibold"
+                  style={{ color: "#0D0E12" }}
+                >
+                  {item.symbol}
+                </span>
+                <span
+                  className="text-[11px] font-mono-data"
+                  style={{ color: "#4A4C54" }}
+                >
+                  {item.price}
+                </span>
+                <span
+                  className="text-[11px] font-mono-data font-medium"
+                  style={{ color: item.positive ? "#00C853" : "#FF5252" }}
+                >
+                  {item.change}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-
-        {/* Duplicate for seamless loop */}
-        {data.map((item, i) => (
-          <div
-            key={`dup-${item.symbol}-${i}`}
-            className="flex items-center gap-3 px-6 py-3"
-            style={{
-              borderRight: i < data.length - 1 ? "1px solid rgba(212,175,55,0.1)" : "none",
-            }}
-          >
-            <span
-              className="text-xs font-mono-data font-medium"
-              style={{ color: "#0D0E12" }}
-            >
-              {item.symbol}
-            </span>
-            <span
-              className="text-xs font-mono-data font-bold"
-              style={{ color: "#4A4C54" }}
-            >
-              {item.price}
-            </span>
-            <span
-              className="text-xs font-mono-data"
-              style={{
-                color: item.positive ? "#00C853" : "#FF5252",
-              }}
-            >
-              {item.change}
-            </span>
-          </div>
-        ))}
+        </div>
       </div>
     </div>
   );

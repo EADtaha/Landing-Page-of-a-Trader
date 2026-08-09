@@ -4,17 +4,11 @@ import Image from 'next/image';
 
 const TG_LINK = process.env.NEXT_PUBLIC_TG_FREE_INVITE || 'https://t.me/XAUYASSINE';
 
-// Navbar is always solid — sits in normal document flow above the ticker bar.
-// No scroll-based transparency to avoid z-index overlap with the hero content.
+// Always-solid navbar — in normal document flow (not fixed/absolute).
+// Sits above MarketTicker which sits above the hero section.
 export default function GoldNavbar() {
   return (
-    <nav
-      className="w-full z-40"
-      style={{
-        background: '#F9F9FB',
-        borderBottom: '1px solid #E5E7EB',
-      }}
-    >
+    <nav className="w-full bg-[#F9F9FB] border-b border-gray-200/80 z-40">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <a href="#hero" aria-label="YassICTFX home">
           <Image
@@ -26,20 +20,24 @@ export default function GoldNavbar() {
             priority
           />
         </a>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: '#4A4C54' }}>
-          {['#about', '#proof', '#services', '#faq'].map((href) => (
+
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-[#4A4C54]">
+          {[
+            { href: '#about',    label: 'About'    },
+            { href: '#proof',    label: 'Results'  },
+            { href: '#services', label: 'Services' },
+            { href: '#faq',      label: 'FAQ'      },
+          ].map(({ href, label }) => (
             <a
               key={href}
               href={href}
-              className="transition-colors capitalize"
-              style={{ color: '#4A4C54' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#D4AF37')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#4A4C54')}
+              className="transition-colors hover:text-[#D4AF37]"
             >
-              {href.slice(1)}
+              {label}
             </a>
           ))}
         </div>
+
         <a
           href={TG_LINK}
           target="_blank"

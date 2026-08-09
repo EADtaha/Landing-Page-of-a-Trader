@@ -31,7 +31,7 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
       <BackgroundChart />
 
       {/* Main content — sits above the canvas */}
-      <div className="relative z-10 w-full max-w-7xl px-6 pt-12 pb-20 lg:px-12">
+      <div className="relative z-10 w-full max-w-7xl px-6 pt-6 pb-20 md:pt-10 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
           {/* ── Left Column (7 cols) ── */}
