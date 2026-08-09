@@ -3,10 +3,34 @@
 import { useEffect, useRef } from "react";
 
 // ---------------------------------------------------------------------------
-// BackgroundChart — live-scrolling XAU/USD price line on HTML5 canvas
-// Runs at 60 FPS with requestAnimationFrame. Absolute z-0, pointer-events-none.
-// Text readability preserved via a white/offwhite radial overlay on top.
+// BackgroundChart — live-scrolling XAU/USD candlestick canvas
+// Bullish candles: #00C853 | Bearish candles: #FF5252 | Wicks: same color
+// Decorative only — values are a random walk, not real market data.
 // ---------------------------------------------------------------------------
+
+interface Candle {
+  open: number;   // normalised 0-1
+  close: number;
+  high: number;
+  low: number;
+}
+
+function generateCandles(n: number): Candle[] {
+  const candles: Candle[] = [];
+  let price = 0.5;
+  for (let i = 0; i < n; i++) {
+    const open  = price;
+    const move  = (Math.random() - 0.48) * 0.06;
+    const close = Math.max(0.1, Math.min(0.9, open + move));
+    const wickUp   = Math.random() * 0.025;
+    const wickDown = Math.random() * 0.025;
+    const high = Math.max(open, close) + wickUp;
+    const low  = Math.min(open, close) - wickDown;
+    candles.push({ open, close, high: Math.min(high, 0.95), low: Math.max(low, 0.05) });
+    price = close;
+  }
+  return candles;
+}
 
 export default function BackgroundChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,7 +41,7 @@ export default function BackgroundChart() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Resize canvas to fill parent
+    // Fit canvas to parent dimensions
     const resize = () => {
       canvas.width  = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
@@ -26,28 +50,21 @@ export default function BackgroundChart() {
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    // ----- Price data -----
-    // Simulate a scrolling XAU/USD line using a random walk seeded with
-    // realistic price levels. This is decorative only — not real market data.
-    const NUM_POINTS = 200;
-    const prices: number[] = [];
-    let base = 0.5; // normalised 0-1
-    for (let i = 0; i < NUM_POINTS; i++) {
-      base += (Math.random() - 0.5) * 0.04;
-      base = Math.max(0.15, Math.min(0.85, base));
-      prices.push(base);
-    }
+    // Pre-generate a large pool of candles; we'll scroll through them
+    const POOL = 600;
+    const candles = generateCandles(POOL);
 
-    let offset = 0;           // horizontal scroll position (pixels)
-    let tickTimer = 0;        // counter for pulse ticks
-    let lastPulseX = -1;      // x-position of the last green tick pulse
-    let pulseRadius = 0;      // growing circle radius for tick pulse
+    const CANDLE_W   = 14;   // candle body width (px)
+    const CANDLE_GAP = 6;    // gap between candles (px)
+    const CANDLE_STEP = CANDLE_W + CANDLE_GAP;
+    const SPEED = 0.4;       // px per frame
+
+    let offset = 0;
     let rafId: number;
 
-    const GOLD   = "#D4AF37";
-    const GREEN  = "#00C853";
-    const GOLD_A = "rgba(212,175,55,";
-    const SPEED  = 0.6;       // px per frame — slow ambient drift
+    const BULLISH = "#00C853";
+    const BEARISH = "#FF5252";
+    const GRID    = "rgba(212,175,55,0.07)";
 
     const draw = () => {
       const W = canvas.width;
@@ -56,83 +73,59 @@ export default function BackgroundChart() {
 
       ctx.clearRect(0, 0, W, H);
 
-      const STEP = W / (NUM_POINTS - 1);  // pixels between data points
-
-      // --- Grid lines (very faint) ---
-      ctx.strokeStyle = "rgba(212,175,55,0.06)";
+      // ── Faint grid ──
+      ctx.strokeStyle = GRID;
       ctx.lineWidth = 0.5;
-      for (let row = 0; row < 6; row++) {
+      for (let row = 1; row < 5; row++) {
         const y = (row / 5) * H;
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
       }
-      for (let col = 0; col < 9; col++) {
-        const x = (col / 8) * W;
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-      }
 
-      // --- Area fill under the price line ---
-      const grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, GOLD_A + "0.12)");
-      grad.addColorStop(1, GOLD_A + "0.0)");
+      // ── Candles ──
+      // How many candles fit across the width + 2 buffer
+      const visible = Math.ceil(W / CANDLE_STEP) + 2;
+      const startCandle = Math.floor(offset / CANDLE_STEP);
+      const pixelOffset = offset % CANDLE_STEP;
 
-      ctx.beginPath();
-      for (let i = 0; i < NUM_POINTS; i++) {
-        const x = i * STEP - (offset % STEP) + (offset % STEP) * 0;
-        // Shift x by the scroll offset wrapping NUM_POINTS cyclically
-        const idx = (i + Math.floor(offset / STEP)) % NUM_POINTS;
-        const y = H - prices[idx] * H * 0.6 - H * 0.15;
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
+      // Vertical mapping: price 0-1 → canvas y (H*0.1 top margin, H*0.15 bottom margin)
+      const priceToY = (p: number) => H * 0.9 - p * H * 0.75;
 
-      // --- Price line ---
-      ctx.beginPath();
-      ctx.strokeStyle = GOLD;
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = GOLD_A + "0.35)";
-      ctx.shadowBlur = 8;
-      for (let i = 0; i < NUM_POINTS; i++) {
-        const x = i * STEP - (offset % STEP);
-        const idx = (i + Math.floor(offset / STEP)) % NUM_POINTS;
-        const y = H - prices[idx] * H * 0.6 - H * 0.15;
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      for (let i = 0; i <= visible; i++) {
+        const idx = (startCandle + i) % POOL;
+        const candle = candles[idx];
+        const x = i * CANDLE_STEP - pixelOffset;
 
-      // --- Live price dot at right edge ---
-      const lastIdx = (NUM_POINTS - 1 + Math.floor(offset / STEP)) % NUM_POINTS;
-      const dotY = H - prices[lastIdx] * H * 0.6 - H * 0.15;
-      const dotX = W - 4;
+        const bullish  = candle.close >= candle.open;
+        const color    = bullish ? BULLISH : BEARISH;
+        const bodyTop  = priceToY(Math.max(candle.open, candle.close));
+        const bodyBot  = priceToY(Math.min(candle.open, candle.close));
+        const bodyH    = Math.max(bodyBot - bodyTop, 1);
+        const wickX    = x + CANDLE_W / 2;
 
-      // Pulse ring
-      tickTimer++;
-      if (tickTimer % 90 === 0) {
-        lastPulseX = dotX;
-        pulseRadius = 0;
-      }
-      if (pulseRadius < 20) {
-        pulseRadius += 0.4;
-        const alpha = 1 - pulseRadius / 20;
+        ctx.strokeStyle = color;
+        ctx.fillStyle   = color;
+        ctx.globalAlpha = 0.55;
+        ctx.lineWidth   = 1.2;
+
+        // Upper wick
         ctx.beginPath();
-        ctx.arc(dotX, dotY, pulseRadius * 2, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(0,200,83,${alpha * 0.6})`;
-        ctx.lineWidth = 1;
+        ctx.moveTo(wickX, priceToY(candle.high));
+        ctx.lineTo(wickX, bodyTop);
         ctx.stroke();
+
+        // Lower wick
+        ctx.beginPath();
+        ctx.moveTo(wickX, bodyBot);
+        ctx.lineTo(wickX, priceToY(candle.low));
+        ctx.stroke();
+
+        // Body
+        ctx.fillRect(x, bodyTop, CANDLE_W, bodyH);
       }
 
-      // Solid dot
-      ctx.beginPath();
-      ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
-      ctx.fillStyle = GREEN;
-      ctx.shadowColor = "rgba(0,200,83,0.8)";
-      ctx.shadowBlur = 10;
-      ctx.fill();
-      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
 
-      // --- Advance scroll ---
+      // ── Advance scroll ──
       offset += SPEED;
 
       rafId = requestAnimationFrame(draw);
@@ -151,19 +144,27 @@ export default function BackgroundChart() {
       className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
       aria-hidden="true"
     >
-      {/* Canvas — fills the section */}
+      {/* Candlestick canvas */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full opacity-[0.55]"
+        className="absolute inset-0 w-full h-full"
         style={{ display: "block" }}
       />
 
-      {/* Soft white radial overlay keeps headline 100% readable */}
+      {/* Gold gradient at top blending into the off-white background */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-x-0 top-0 h-48 pointer-events-none"
+        style={{
+          background: "linear-gradient(to bottom, rgba(212,175,55,0.18), rgba(249,249,251,0.82), rgba(249,249,251,0))",
+        }}
+      />
+
+      {/* Centre radial wash — keeps headline text crisp */}
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(249,249,251,0.88) 0%, rgba(249,249,251,0.60) 55%, rgba(249,249,251,0) 100%)",
+            "radial-gradient(ellipse 75% 65% at 40% 45%, rgba(249,249,251,0.82) 0%, rgba(249,249,251,0.50) 55%, rgba(249,249,251,0) 100%)",
         }}
       />
     </div>

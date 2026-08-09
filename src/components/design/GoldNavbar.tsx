@@ -1,26 +1,18 @@
 "use client";
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
 
 const TG_LINK = process.env.NEXT_PUBLIC_TG_FREE_INVITE || 'https://t.me/XAUYASSINE';
 
+// Navbar is always solid — sits in normal document flow above the ticker bar.
+// No scroll-based transparency to avoid z-index overlap with the hero content.
 export default function GoldNavbar() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-40 transition-all duration-300"
+      className="w-full z-40"
       style={{
-        background: scrolled ? 'rgba(255,255,255,0.95)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(229, 231, 235, 1)' : 'none',
+        background: '#F9F9FB',
+        borderBottom: '1px solid #E5E7EB',
       }}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -34,9 +26,16 @@ export default function GoldNavbar() {
             priority
           />
         </a>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-base-charcoal-muted">
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: '#4A4C54' }}>
           {['#about', '#proof', '#services', '#faq'].map((href) => (
-            <a key={href} href={href} className="hover:text-accent-gold transition-colors capitalize">
+            <a
+              key={href}
+              href={href}
+              className="transition-colors capitalize"
+              style={{ color: '#4A4C54' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#D4AF37')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#4A4C54')}
+            >
               {href.slice(1)}
             </a>
           ))}

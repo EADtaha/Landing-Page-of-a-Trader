@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import GoldNavbar           from "@/components/design/GoldNavbar";
+import MarketTicker         from "@/components/design/MarketTicker";
 import GoldHero             from "@/components/design/GoldHero";
 import GoldAbout            from "@/components/design/GoldAbout";
 import ResultsCarousel      from "@/components/design/ResultsCarousel";
@@ -31,6 +32,8 @@ export default function Page() {
       className="selection:bg-[rgba(212,175,55,0.2)] selection:text-[#0D0E12]"
     >
       <GoldNavbar />
+      {/* Ticker sits in normal flow directly below the solid navbar */}
+      <MarketTicker />
 
       <main>
         {/* 1. HERO SECTION */}
