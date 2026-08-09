@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import BackgroundChart from "./BackgroundChart";
 import type { RedirectDestination } from "@/lib/validations/lead";
 
@@ -31,16 +32,20 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
       <BackgroundChart />
 
       {/* Main content — sits above the canvas */}
-      <div className="relative z-10 w-full max-w-7xl px-6 pt-6 pb-20 md:pt-10 lg:px-12">
+      <div className="relative z-10 w-full max-w-7xl px-6 pt-8 pb-20 md:pt-12 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
           {/* ── Left Column (7 cols) ── */}
           <div className="lg:col-span-7 flex flex-col items-start text-left space-y-8">
 
             {/* Primary Headline */}
-            <h1
+            <motion.h1
               className="font-display font-black leading-[0.92] tracking-tighter"
               style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
+              initial={{ y: -20, opacity: 0, filter: "blur(4px)" }}
+              whileInView={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <span className="block" style={{ color: '#0D0E12', marginBottom: '0.25rem' }}>
                 Master Gold.
@@ -57,20 +62,30 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
               >
                 Trade With Precision.
               </span>
-            </h1>
+            </motion.h1>
 
             {/* Subheadline */}
-            <p
+            <motion.p
               className="text-lg md:text-xl max-w-xl leading-relaxed"
               style={{ color: '#4A4C54', fontWeight: 300 }}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
             >
               Institutional XAU/USD signals, structured video education, and
               1-on-1 mentorship designed for traders who demand real execution
               over random signals.
-            </p>
+            </motion.p>
 
             {/* Primary CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <motion.div
+              className="flex flex-wrap items-center gap-4 pt-2"
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+            >
               <button
                 onClick={() => onOpenModal("free_telegram")}
                 className="flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-bold transition-all duration-300 hover:scale-[1.02]"
@@ -93,11 +108,17 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
               >
                 Explore Services
               </a>
-            </div>
+            </motion.div>
           </div>
 
           {/* ── Right Column (5 cols) — Cinematic 9:16 Video ── */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+          <motion.div
+            className="lg:col-span-5 flex justify-center lg:justify-end"
+            initial={{ scale: 0.95, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
             <div
               className="relative overflow-hidden rounded-2xl"
               style={{
@@ -109,13 +130,15 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
               }}
             >
               {!videoErrored ? (
-                <iframe
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1"
-                  title="Trader story video"
-                  className="absolute inset-0 w-full h-full"
-                  allow="autoplay; encrypted-media"
-                  frameBorder="0"
-                  allowFullScreen
+                <video
+                  src="/assets/hero-trading.mp4"
+                  title="Trading video"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  muted
+                  loop
+                  autoPlay
+                  playsInline
+                  onError={handleVideoError}
                 />
               ) : (
                 <div className="absolute inset-0">
@@ -165,20 +188,8 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
                   </span>
                 </button>
               )}
-
-              {/* Live price badge */}
-              <div
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-bold font-mono-data whitespace-nowrap"
-                style={{
-                  background: "rgba(13,14,18,0.85)",
-                  color: "#D4AF37",
-                  border: "1px solid rgba(212,175,55,0.3)",
-                }}
-              >
-                XAU/USD: $2,387.42 ↑
-              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom Stats Bar */}

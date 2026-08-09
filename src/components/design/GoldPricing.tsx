@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import type { RedirectDestination } from '@/lib/validations/lead';
 
 function useReveal() {
@@ -274,8 +275,17 @@ export default function GoldPricing({ onOpenModal }: GoldPricingProps) {
 
         {/* Cards - Desktop 2x2, Mobile single column */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 xl:grid-cols-4">
-          {TIERS.map((tier, i) => (
-            <PricingCard key={tier.id} tier={tier} onOpenModal={onOpenModal} />
+          {TIERS.map((tier, index) => (
+            <motion.div
+              key={tier.id}
+              initial={{ opacity: 0, y: 40, rotateX: 15 }}
+              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: index * 0.12, ease: "easeOut" }}
+              style={{ perspective: "1000px" }}
+            >
+              <PricingCard tier={tier} onOpenModal={onOpenModal} />
+            </motion.div>
           ))}
         </div>
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 // ---------------------------------------------------------------------------
 // Scroll-reveal hook
@@ -208,7 +209,7 @@ export default function ResultsCarousel() {
             const isCenter = offset === 0;
 
             return (
-              <div
+              <motion.div
                 key={`${offset}-${idx}`}
                 onClick={() => {
                   if (offset === -1) prev();
@@ -222,9 +223,13 @@ export default function ResultsCarousel() {
                   cursor:    isCenter ? 'default' : 'pointer',
                   zIndex:    isCenter ? 10 : 5,
                 }}
+                initial={{ scale: 0.9, opacity: 0 }}
+                whileInView={{ scale: isCenter ? 1 : 0.87, opacity: isCenter ? 1 : 0.4 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, delay: idx * 0.15, ease: "easeOut" }}
               >
                 <PhoneCard item={item} isCenter={isCenter} />
-              </div>
+              </motion.div>
             );
           })}
         </div>

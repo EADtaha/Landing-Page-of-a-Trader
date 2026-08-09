@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { ShieldCheck, TrendingUp, Users, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -84,10 +85,10 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
 
         {/* 4-card grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {ADVANTAGES.map((a) => {
+          {ADVANTAGES.map((a, index) => {
             const Icon = a.Icon;
             return (
-            <div
+            <motion.div
               key={a.title}
               className="relative p-8 rounded-2xl group transition-all duration-300 hover:-translate-y-1 border"
               style={
@@ -102,6 +103,10 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
                       border: '1px solid rgba(229, 231, 235, 1)',
                     }
               }
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
             >
               {/* Tag chip */}
               <div
@@ -134,18 +139,22 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
                   <p className="text-base-charcoal-muted text-sm leading-relaxed">{a.desc}</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
             );
           })}
         </div>
 
         {/* Bottom CTA strip */}
-        <div
+        <motion.div
           className="p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6"
           style={{
             background: 'linear-gradient(135deg, #C5A028, #D4AF37)',
             border: '1px solid rgba(212, 175, 55, 0.3)',
           }}
+          initial={{ y: 60, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <div>
             <div
@@ -188,7 +197,7 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
               Join Free Now
             </a>
           )}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

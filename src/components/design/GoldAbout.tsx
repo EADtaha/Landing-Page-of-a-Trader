@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -29,9 +30,22 @@ export default function GoldAbout() {
   return (
     <section id="about" className="py-24 px-6 bg-base-offwhite">
       <div className="max-w-7xl mx-auto">
-        <div ref={ref} className="section-reveal grid md:grid-cols-2 gap-16 items-center">
+        <motion.div
+          ref={ref}
+          className="section-reveal grid md:grid-cols-2 gap-16 items-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           {/* Portrait */}
-          <div className="relative order-2 md:order-1">
+          <motion.div
+            className="relative order-2 md:order-1"
+            initial={{ x: -50, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
             <div className="relative overflow-hidden rounded-2xl shadow-soft"
               style={{ aspectRatio: '3/4', maxWidth: '420px', border: '1px solid rgba(229, 231, 235, 1)' }}>
               <Image
@@ -61,10 +75,16 @@ export default function GoldAbout() {
               className="absolute -bottom-6 -right-6 w-48 h-48 rounded-2xl -z-10"
               style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.15)' }}
             />
-          </div>
+          </motion.div>
 
           {/* Bio */}
-          <div className="order-1 md:order-2">
+          <motion.div
+            className="order-1 md:order-2"
+            initial={{ x: 50, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
             <div
               className="inline-block text-xs font-semibold tracking-widest uppercase mb-6 px-4 py-2 rounded-full"
               style={{ color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.25)', background: 'rgba(212, 175, 55, 0.08)' }}
@@ -97,9 +117,15 @@ export default function GoldAbout() {
             </p>
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {STATS.map((s) => (
-                <div key={s.label} className="p-5 rounded-2xl text-center transition-colors hover:bg-base-offwhite"
+              {STATS.map((s, index) => (
+                <motion.div
+                  key={s.label}
+                  className="p-5 rounded-2xl text-center transition-colors hover:bg-base-offwhite"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(229, 231, 235, 1)' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
                 >
                   <div
                     className="font-display font-bold text-2xl mb-1"
@@ -113,11 +139,11 @@ export default function GoldAbout() {
                   >
                     {s.label}
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

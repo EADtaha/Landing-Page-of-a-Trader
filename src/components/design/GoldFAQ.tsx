@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,9 +36,16 @@ export default function GoldFAQ() {
         </div>
         <div className="space-y-3">
           {FAQS.map((faq, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden transition-all duration-200"
+            <motion.div
+              key={i}
+              className="rounded-2xl overflow-hidden transition-all duration-200"
               style={{ border: open===i ? '1px solid rgba(212, 175, 55, 0.35)' : '1px solid rgba(229, 231, 235, 1)',
-                background: open===i ? '#FFFFFF' : '#FFFFFF' }}>
+                background: open===i ? '#FFFFFF' : '#FFFFFF' }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ type: "spring", stiffness: 100, delay: i * 0.08, damping: 12 }}
+            >
               <button className="w-full flex items-center justify-between px-6 py-5 text-left gap-4"
                 onClick={() => setOpen(open===i ? null : i)}>
                 <span className="font-semibold text-base" style={{ color: open===i ? '#D4AF37' : '#0D0E12' }}>{faq.q}</span>
@@ -47,7 +55,7 @@ export default function GoldFAQ() {
               <div className="overflow-hidden transition-all duration-300" style={{ maxHeight: open===i ? '300px' : '0px' }}>
                 <p className="px-6 pb-5 text-base-charcoal-muted text-sm leading-relaxed">{faq.a}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
