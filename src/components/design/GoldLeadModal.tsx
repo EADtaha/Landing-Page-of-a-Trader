@@ -12,15 +12,13 @@ const WA_BASE = `https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER || '212602716
 function resolveRedirectUrl(destination: RedirectDestination): string {
   const FREE_TG  = process.env.NEXT_PUBLIC_TG_FREE_INVITE      || 'https://t.me/XAUYASSINE';
   const VIP_TG   = process.env.NEXT_PUBLIC_TG_VIP_LINK         || 'https://t.me/yassinffx';
-  const ASST_TG  = process.env.NEXT_PUBLIC_TELEGRAM_ASSISTANT_LINK || VIP_TG;   // fallback to VIP if not set
+  const ASST_TG  = process.env.NEXT_PUBLIC_TELEGRAM_ASSISTANT_LINK || VIP_TG;
   const WA_LINK  = process.env.NEXT_PUBLIC_WHATSAPP_LINK || WA_BASE;
 
   switch (destination) {
     case 'free_telegram':
       return FREE_TG;
     case 'vip_telegram':
-      return ASST_TG;
-    case 'copy_trading_telegram':
       return ASST_TG;
     case 'video_course_whatsapp':
       return `${WA_LINK}?text=${encodeURIComponent('Hi Yassine, I submitted my details for the Full Course.')}`;
@@ -31,8 +29,7 @@ function resolveRedirectUrl(destination: RedirectDestination): string {
 
 function isTelegramDestination(destination: RedirectDestination): boolean {
   return destination === 'free_telegram'
-    || destination === 'vip_telegram'
-    || destination === 'copy_trading_telegram';
+    || destination === 'vip_telegram';
 }
 
 // ---------------------------------------------------------------------------
@@ -49,11 +46,6 @@ const DEST_META: Record<RedirectDestination, { badge: string; heading: string; s
     badge:   'VIP Signals',
     heading: 'Join the VIP Telegram signal channel.',
     sub:     'Daily XAU/USD signals with full entry and exit details.',
-  },
-  copy_trading_telegram: {
-    badge:   'Copy Trading',
-    heading: 'Start 100% automated copy trading.',
-    sub:     'Min. $200 capital. Our assistant will walk you through setup.',
   },
   mentorship_whatsapp:   {
     badge:   '1-on-1 Coaching',

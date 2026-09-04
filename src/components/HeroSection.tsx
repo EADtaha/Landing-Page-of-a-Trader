@@ -259,22 +259,13 @@ export default function HeroSection() {
                 delay={0.35}
               />
 
-              {/* Start Copy Trading → copy_trading_telegram */}
-              <CtaButton
-                label="Start Copy Trading"
-                variant="ghost"
-                icon={<TelegramIcon />}
-                onClick={() => openModal("copy_trading_telegram")}
-                delay={0.4}
-              />
-
               {/* Join Free Telegram → free_telegram */}
               <CtaButton
                 label="Join Free Telegram"
                 variant="ghost"
                 icon={<TelegramIcon />}
                 onClick={() => openModal("free_telegram")}
-                delay={0.45}
+                delay={0.4}
               />
             </motion.div>
 

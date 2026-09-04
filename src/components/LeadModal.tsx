@@ -35,7 +35,6 @@ type ApiResponse        = ApiSuccessResponse | ApiErrorResponse;
 const DESTINATION_LABELS: Record<RedirectDestination, string> = {
   free_telegram:         "Join Free Telegram",
   vip_telegram:          "Join VIP Signals",
-  copy_trading_telegram: "Start Copy Trading",
   mentorship_whatsapp:   "Book 1-on-1 Mentorship",
   video_course_whatsapp: "Get Video Course",
 };
