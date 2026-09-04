@@ -131,13 +131,15 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: (dest: Redirect
             >
               {!videoErrored ? (
                 <video
-                  src="/assets/hero-trading.mp4"
+                  src="/videos/output.mp4"
                   title="Trading video"
                   className="absolute inset-0 w-full h-full object-cover"
                   muted
                   loop
                   autoPlay
                   playsInline
+                  controls
+                  preload="metadata"
                   onError={handleVideoError}
                 />
               ) : (

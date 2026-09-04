@@ -44,7 +44,7 @@ const TIERS: Tier[] = [
     id:            'vip' as const,
     name:          'VIP TELEGRAM',
     tag:           null,
-    price:         '$90',
+    price:         '$70',
     strikethrough: null,
     per:           '/month',
     highlight:     false,
@@ -62,7 +62,7 @@ const TIERS: Tier[] = [
     id:            'course' as const,
     name:          'FULL COURSE',
     tag:           null,
-    price:         '$149',
+    price:         '$80',
     strikethrough: '$297',
     per:           'one-time payment',
     highlight:     false,
@@ -92,24 +92,6 @@ const TIERS: Tier[] = [
       'Live Trading Together',
       'Review of your Trades',
       'Direct WhatsApp Access',
-    ],
-  },
-  {
-    id:            'copy' as const,
-    name:          'COPY TRADING',
-    tag:           null,
-    price:         'FREE',
-    strikethrough: null,
-    per:           'Min. Capital: $300',
-    highlight:     false,
-    destination:   'copy_trading_telegram' as RedirectDestination,
-    cta:           'SETUP COPY',
-    advantage:     'Zero screen time. 100% automated.',
-    features: [
-      '100% Hands-Free Trading',
-      'Auto-mirror exact trades',
-      'Strict Risk Management',
-      'Withdraw anytime',
     ],
   },
 ];
@@ -273,8 +255,8 @@ export default function GoldPricing({ onOpenModal }: GoldPricingProps) {
           </p>
         </div>
 
-        {/* Cards - Desktop 2x2, Mobile single column */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 xl:grid-cols-4">
+        {/* Cards — 3-column grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {TIERS.map((tier, index) => (
             <motion.div
               key={tier.id}

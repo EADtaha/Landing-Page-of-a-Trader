@@ -7,7 +7,6 @@ import { z } from "zod";
 export const REDIRECT_DESTINATIONS = [
   "free_telegram",
   "vip_telegram",
-  "copy_trading_telegram",
   "mentorship_whatsapp",
   "video_course_whatsapp",
 ] as const;

@@ -29,7 +29,6 @@ function buildRedirectUrl(destination: RedirectDestination): string | null {
       return FREE_TG_INVITE;
 
     case "vip_telegram":
-    case "copy_trading_telegram":
       if (!TG_VIP_LINK) {
         console.warn("[/api/lead] TG_VIP_LINK is not configured");
         return null;
