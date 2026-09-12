@@ -137,7 +137,7 @@ const en: Translations = {
     subtitle: "From live signals to full mentorship — every tier is designed for a different stage of your trading journey.",
     vipTelegram: {
       name:        "VIP TELEGRAM",
-      price:       "$40",
+      price:       "$50",
       period:      "/ month",
       description: "Best signal-to-noise ratio on XAU/USD — nothing else.",
       features: [
@@ -255,7 +255,7 @@ const ar: Translations = {
     subtitle: "من الإشارات المباشرة إلى الإرشاد الكامل — كل مستوى مصمم لمرحلة مختلفة من رحلتك في التداول.",
     vipTelegram: {
       name:        "VIP TELEGRAM",
-      price:       "$40",
+      price:       "$50",
       period:      "/ شهرياً",
       description: "أفضل نسبة إشارة إلى ضوضاء على XAU/USD — لا شيء آخر.",
       features: [

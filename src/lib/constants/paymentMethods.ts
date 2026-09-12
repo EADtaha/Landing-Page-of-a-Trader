@@ -49,7 +49,7 @@ export interface TierMeta {
 export const TIER_META: Record<CheckoutTier, TierMeta> = {
   vip_telegram: {
     name:        "VIP Telegram Membership",
-    price:       "$40",
+    price:       "$50",
     period:      "/ month",
     description: "Institutional XAU/USD setups, daily market reviews, and trade execution.",
   },
