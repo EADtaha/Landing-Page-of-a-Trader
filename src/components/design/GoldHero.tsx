@@ -45,7 +45,24 @@ export default function GoldHero({ onOpenModal }: { onOpenModal: () => void }) {
         />
       </div>
 
-      {/* ── Top notification bar removed ── */}
+      {/* ── Top notification bar ── */}
+      <div className="relative z-20 w-full flex justify-center pt-4 px-4">
+        <button
+          type="button"
+          onClick={onOpenModal}
+          className="inline-flex items-center gap-2 text-xs font-medium px-4 py-2 rounded-full transition-all hover:scale-[1.02]"
+          style={{
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            color: "#D1D5DB",
+            flexDirection: isRTL ? "row-reverse" : "row",
+          }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#d4a537] flex-shrink-0" />
+          {t.hero.topPill}
+          <span style={{ color: "#d4a537", fontWeight: 600 }}>{t.hero.topJoin}</span>
+        </button>
+      </div>
 
       {/* ── Hero copy — centred ── */}
       <div className="relative z-20 flex-1 flex items-center justify-center px-6 py-16 md:py-24">
