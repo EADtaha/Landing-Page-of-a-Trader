@@ -38,19 +38,17 @@ const ADVANTAGES = [
     Icon:      Users,
     tag:       'Community Driven',
     title:     'Cure Trading Isolation',
-    desc:      "Trading alone is mentally draining. Surround yourself with a network of driven individuals pushing for exponential growth.",
+    desc:      'Trading alone is mentally draining. Surround yourself with a network of driven individuals pushing for growth.',
     highlight: false,
   },
   {
     Icon:      Award,
     tag:       'Direct Access',
     title:     'Learn From a Mentor',
-    desc:      "Stop guessing. Learn from someone who has already been through the highs and lows, so you don't have to make the same mistakes.",
+    desc:      "Stop guessing. Learn from someone who's been through the highs and lows so you don't repeat the same mistakes.",
     highlight: false,
   },
 ] as const;
-
-const TG_FREE = process.env.NEXT_PUBLIC_TG_FREE_INVITE || 'https://t.me/XAUYASSINE';
 
 export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void }) {
   const ref = useReveal();
@@ -58,88 +56,95 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
   return (
     <section
       id="community"
-      className="py-24 px-6 bg-base-offwhite"
-      style={{ borderTop: '1px solid rgba(229, 231, 235, 1)' }}
+      className="py-14 md:py-20 px-6 relative overflow-hidden"
+      style={{ background: '#0a0a0c', borderTop: '1px solid rgba(255,255,255,0.06)' }}
     >
       <div className="max-w-7xl mx-auto">
-
         {/* Header */}
         <div ref={ref} className="section-reveal text-center mb-16">
           <div
             className="inline-block text-xs font-semibold tracking-widest uppercase mb-4 px-4 py-1.5 rounded-full"
-            style={{ color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.25)', background: 'rgba(212, 175, 55, 0.08)' }}
+            style={{ color: '#e0b13e', border: '1px solid rgba(224,177,62,0.25)', background: 'rgba(224,177,62,0.06)' }}
           >
             Why YassICTFX
           </div>
           <h2
-            className="font-display font-bold text-base-charcoal leading-tight"
+            className="font-display font-bold text-white leading-tight"
             style={{ fontSize: 'clamp(2rem,4vw,3.5rem)', letterSpacing: '-0.02em' }}
           >
             Advantages of Joining.
           </h2>
-          <p className="text-base-charcoal-muted mt-4 text-base max-w-xl mx-auto">
+          <p className="text-neutral-400 mt-4 text-base max-w-xl mx-auto">
             Not another signal group. A complete ecosystem built around one goal — making you a
             consistently profitable trader with a real edge.
           </p>
         </div>
 
         {/* 4-card grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {ADVANTAGES.map((a, index) => {
             const Icon = a.Icon;
             return (
-            <motion.div
-              key={a.title}
-              className="relative p-8 rounded-2xl group transition-all duration-300 hover:-translate-y-1 border"
-              style={
-                a.highlight
-                  ? {
-                      background: '#FFFFFF',
-                      border: '1px solid rgba(212, 175, 55, 0.4)',
-                      boxShadow: '0 12px 40px rgba(212, 175, 55, 0.12), 0 8px 32px rgba(0,0,0,0.08)',
-                    }
-                  : {
-                      background: '#FFFFFF',
-                      border: '1px solid rgba(229, 231, 235, 1)',
-                    }
-              }
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-            >
-              {/* Tag chip */}
-              <div
-                className="inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-5"
-                style={{
-                  color: '#D4AF37',
-                  border: '1px solid rgba(212, 175, 55, 0.25)',
-                  background: 'rgba(212, 175, 55, 0.08)',
-                }}
+              <motion.div
+                key={a.title}
+                className="relative p-7 rounded-2xl group transition-all duration-300 hover:-translate-y-1"
+                style={
+                  a.highlight
+                    ? {
+                        background: '#111114',
+                        border: '1px solid rgba(224,177,62,0.35)',
+                        boxShadow: '0 0 40px rgba(224,177,62,0.07), 0 12px 40px rgba(0,0,0,0.3)',
+                      }
+                    : {
+                        background: '#111114',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                      }
+                }
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
               >
-                {a.tag}
-              </div>
-
-              <div className="flex items-start gap-5">
-                {/* Icon */}
+                {/* Tag */}
                 <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-                  style={{ background: a.highlight ? 'rgba(212, 175, 55, 0.1)' : 'rgba(212, 175, 55, 0.06)', border: '1px solid rgba(212, 175, 55, 0.2)' }}
+                  className="inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-5"
+                  style={{
+                    color: '#e0b13e',
+                    border: '1px solid rgba(224,177,62,0.2)',
+                    background: 'rgba(224,177,62,0.06)',
+                  }}
                 >
-                  <Icon className="w-6 h-6" style={{ color: a.highlight ? '#D4AF37' : '#71737C' }} strokeWidth={1.5} aria-hidden="true" />
+                  {a.tag}
                 </div>
 
-                <div>
-                  <h3
-                    className="font-display font-bold text-base-charcoal text-xl mb-2 leading-tight"
-                    style={{ fontStyle: 'italic' }}
+                <div className="flex items-start gap-4">
+                  {/* Icon */}
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
+                    style={{
+                      background: 'rgba(224,177,62,0.08)',
+                      border: '1px solid rgba(224,177,62,0.18)',
+                    }}
                   >
-                    {a.title}
-                  </h3>
-                  <p className="text-base-charcoal-muted text-sm leading-relaxed">{a.desc}</p>
+                    <Icon
+                      className="w-5 h-5"
+                      style={{ color: a.highlight ? '#e0b13e' : '#9CA3AF' }}
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <h3
+                      className="font-display font-bold text-white text-lg mb-2 leading-tight"
+                      style={{ fontStyle: 'italic' }}
+                    >
+                      {a.title}
+                    </h3>
+                    <p className="text-neutral-400 text-sm leading-relaxed">{a.desc}</p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
             );
           })}
         </div>
@@ -148,33 +153,28 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
         <motion.div
           className="p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6"
           style={{
-            background: 'linear-gradient(135deg, #C5A028, #D4AF37)',
-            border: '1px solid rgba(212, 175, 55, 0.3)',
+            background: 'linear-gradient(135deg, rgba(201,152,40,0.15) 0%, rgba(224,177,62,0.08) 100%)',
+            border: '1px solid rgba(224,177,62,0.25)',
           }}
           initial={{ y: 60, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
         >
           <div>
-            <div
-              className="font-display font-bold text-white text-2xl mb-1"
-              style={{ fontStyle: 'italic' }}
-            >
+            <div className="font-display font-bold text-white text-2xl mb-1" style={{ fontStyle: 'italic' }}>
               Join 1,700+ traders already profiting.
             </div>
-            <div className="text-white/70 text-sm">
-              Active community · New signals daily · Zero fluff
-            </div>
+            <div className="text-neutral-400 text-sm">Active community · New signals daily · Zero fluff</div>
           </div>
           {onOpenModal ? (
             <button
               onClick={onOpenModal}
-              className="flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm transition-all hover:scale-[1.03] flex-shrink-0"
+              className="flex items-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm transition-all hover:scale-[1.03] flex-shrink-0"
               style={{
-                background: '#0D0E12',
-                color: '#FFFFFF',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                background: 'linear-gradient(135deg, #c99828, #e0b13e)',
+                color: '#0a0a0c',
+                boxShadow: '0 8px 24px rgba(224,177,62,0.3)',
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -184,14 +184,13 @@ export default function GoldBenefits({ onOpenModal }: { onOpenModal?: () => void
             </button>
           ) : (
             <a
-              href={TG_FREE}
+              href="https://t.me/XAUYASSINE"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold text-sm transition-all hover:scale-[1.03] flex-shrink-0"
+              className="flex items-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm transition-all hover:scale-[1.03] flex-shrink-0"
               style={{
-                background: '#0D0E12',
-                color: '#FFFFFF',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                background: 'linear-gradient(135deg, #c99828, #e0b13e)',
+                color: '#0a0a0c',
               }}
             >
               Join Free Now

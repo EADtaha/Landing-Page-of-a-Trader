@@ -52,60 +52,55 @@ function PhoneCard({ item, isCenter }: PhoneCardProps) {
     <div
       className="rounded-[2.5rem] overflow-hidden"
       style={{
-        background: '#F8F9FA',
+        background: '#111114',
         border: isCenter
-          ? '2px solid rgba(212, 175, 55, 0.45)'
-          : '2px solid rgba(229, 231, 235, 1)',
+          ? '2px solid rgba(224,177,62,0.4)'
+          : '2px solid rgba(255,255,255,0.07)',
         boxShadow: isCenter
-          ? '0 32px 80px rgba(0,0,0,0.15), 0 0 40px rgba(212, 175, 55, 0.08)'
+          ? '0 32px 80px rgba(0,0,0,0.5), 0 0 40px rgba(224,177,62,0.1)'
           : 'none',
         padding: '10px',
       }}
     >
       <div
         className="rounded-[2rem] overflow-hidden"
-        style={{ background: '#FFFFFF' }}
+        style={{ background: '#0e0e12' }}
       >
         {/* Telegram-style app bar */}
         <div
           className="flex items-center gap-2 px-4 py-3"
           style={{
-            background: '#F8F9FA',
-            borderBottom: '1px solid rgba(229, 231, 235, 1)',
+            background: '#161619',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
           }}
         >
           <div
             className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #C5A028, #D4AF37)',
-              color: '#0D0E12',
+              background: 'linear-gradient(135deg, #c99828, #e0b13e)',
+              color: '#0a0a0c',
             }}
           >
             Y
           </div>
           <div className="min-w-0">
-            <div
-              className="text-base-charcoal text-xs font-semibold leading-none truncate"
-            >
+            <div className="text-white text-xs font-semibold leading-none truncate">
               YassICTFX Community
             </div>
-            <div
-              className="text-base-metadata text-[10px] mt-0.5"
-            >
+            <div className="text-neutral-500 text-[10px] mt-0.5">
               1,700+ members
             </div>
           </div>
-          {/* Status dot */}
           <div className="ml-auto flex-shrink-0 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-signal-green" />
-            <span className="text-[9px] text-base-metadata">online</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[9px] text-neutral-500">online</span>
           </div>
         </div>
 
-        {/* Screenshot fills the phone body — white bg so the image pops */}
+        {/* Screenshot body */}
         <div
-          className="relative w-full bg-white"
-          style={{ aspectRatio: '9/16' }}
+          className="relative w-full"
+          style={{ aspectRatio: '9/16', background: '#0e0e12' }}
         >
           <Image
             src={item.src}
@@ -117,17 +112,17 @@ function PhoneCard({ item, isCenter }: PhoneCardProps) {
           />
         </div>
 
-        {/* Fake input bar — keeps phone illusion intact */}
+        {/* Fake input bar */}
         <div
           className="flex items-center gap-2 px-3 py-2.5"
           style={{
-            background: '#F8F9FA',
-            borderTop: '1px solid rgba(229, 231, 235, 1)',
+            background: '#161619',
+            borderTop: '1px solid rgba(255,255,255,0.07)',
           }}
         >
           <div
             className="flex-1 h-7 rounded-full px-3 flex items-center text-[10px]"
-            style={{ background: '#F1F3F5', color: '#71737C' }}
+            style={{ background: 'rgba(255,255,255,0.06)', color: '#6B7280' }}
           >
             Message…
           </div>
@@ -172,30 +167,30 @@ export default function ResultsCarousel() {
   return (
     <section
       id="proof"
-      className="py-24 px-6 overflow-hidden bg-base-offwhite"
-      style={{ borderTop: '1px solid rgba(229, 231, 235, 1)' }}
+      className="py-14 md:py-16 px-6 overflow-hidden"
+      style={{ background: '#0a0a0c', borderTop: '1px solid rgba(255,255,255,0.06)' }}
     >
       <div className="max-w-6xl mx-auto">
 
         {/* Section header */}
-        <div ref={ref} className="section-reveal text-center mb-16">
+        <div ref={ref} className="section-reveal text-center mb-10">
           <div
             className="inline-block text-xs font-semibold tracking-widest uppercase mb-4 px-4 py-1.5 rounded-full"
             style={{
-              color: '#D4AF37',
-              border: '1px solid rgba(212, 175, 55, 0.25)',
-              background: 'rgba(212, 175, 55, 0.08)',
+              color: '#e0b13e',
+              border: '1px solid rgba(224,177,62,0.25)',
+              background: 'rgba(224,177,62,0.06)',
             }}
           >
             Proof Over Promises
           </div>
           <h2
-            className="font-display font-bold text-base-charcoal leading-tight"
+            className="font-display font-bold text-white leading-tight"
             style={{ fontSize: 'clamp(2rem,4vw,3.5rem)', letterSpacing: '-0.02em' }}
           >
             Real members. Real trades.
           </h2>
-          <p className="text-base-charcoal-muted mt-4 text-base max-w-xl mx-auto">
+          <p className="text-neutral-400 mt-4 text-base max-w-xl mx-auto">
             Screenshots from inside our community channels. Unedited, timestamped,
             posted directly by members.
           </p>
@@ -241,9 +236,9 @@ export default function ResultsCarousel() {
             aria-label="Previous testimonial"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
             style={{
-              border: '1px solid rgba(212, 175, 55, 0.25)',
-              color: '#D4AF37',
-              background: 'rgba(212, 175, 55, 0.08)',
+              border: '1px solid rgba(224,177,62,0.25)',
+              color: '#e0b13e',
+              background: 'rgba(224,177,62,0.07)',
             }}
           >
             ←
@@ -262,7 +257,7 @@ export default function ResultsCarousel() {
                 style={{
                   width:      i === current ? '24px' : '6px',
                   height:     '6px',
-                  background: i === current ? '#D4AF37' : 'rgba(212, 175, 55, 0.25)',
+                  background: i === current ? '#e0b13e' : 'rgba(224,177,62,0.2)',
                 }}
               />
             ))}
@@ -273,13 +268,35 @@ export default function ResultsCarousel() {
             aria-label="Next testimonial"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
             style={{
-              border: '1px solid rgba(212, 175, 55, 0.25)',
-              color: '#D4AF37',
-              background: 'rgba(212, 175, 55, 0.08)',
+              border: '1px solid rgba(224,177,62,0.25)',
+              color: '#e0b13e',
+              background: 'rgba(224,177,62,0.07)',
             }}
           >
             →
           </button>
+        </div>
+
+        {/* Social proof chips — flanking context for the carousel */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
+          {[
+            { icon: "👥", label: "1,700+ active members" },
+            { icon: "✅", label: "Unedited screenshots" },
+            { icon: "📅", label: "Timestamped entries" },
+            { icon: "🌍", label: "38 countries represented" },
+          ].map((chip) => (
+            <div
+              key={chip.label}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-neutral-400"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
+              <span aria-hidden="true">{chip.icon}</span>
+              {chip.label}
+            </div>
+          ))}
         </div>
 
         {/* Disclaimer */}

@@ -2,18 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { leadSchema, type RedirectDestination } from '@/lib/validations/lead';
+import { FREE_TG_URL, VIP_TG_URL, WA_BASE_URL, WA_NUMBER } from '@/lib/constants/links';
 
 // ---------------------------------------------------------------------------
 // Per-destination config — what the modal shows and where to send the user
 // ---------------------------------------------------------------------------
 
-const WA_BASE = `https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER || '212602716624'}`;
+const WA_BASE = WA_BASE_URL || `https://wa.me/${WA_NUMBER}`;
 
 function resolveRedirectUrl(destination: RedirectDestination): string {
-  const FREE_TG  = process.env.NEXT_PUBLIC_TG_FREE_INVITE      || 'https://t.me/XAUYASSINE';
-  const VIP_TG   = process.env.NEXT_PUBLIC_TG_VIP_LINK         || 'https://t.me/yassinffx';
+  const FREE_TG  = FREE_TG_URL;
+  const VIP_TG   = VIP_TG_URL;
   const ASST_TG  = process.env.NEXT_PUBLIC_TELEGRAM_ASSISTANT_LINK || VIP_TG;
-  const WA_LINK  = process.env.NEXT_PUBLIC_WHATSAPP_LINK || WA_BASE;
+  const WA_LINK  = WA_BASE;
 
   switch (destination) {
     case 'free_telegram':
